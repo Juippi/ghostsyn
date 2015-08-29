@@ -1,0 +1,13 @@
+{
+    "volume": 2.0,
+    "filter_cutoff": 0.035,
+    "filter_decay": 0.99998,
+    "filter_feedback": 0.0,
+    "amp_decay": 0.99998,
+    "pitch_decay": 0.99997,
+    "pitch_min": 0.5,
+    "osc_shape": "square",
+    "oscillators": [
+        {"pitch": 1.0}
+    ]
+}

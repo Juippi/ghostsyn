@@ -1,0 +1,15 @@
+{
+    "volume": 1.5,
+    "filter_cutoff": 0.075,
+    "filter_decay": 0.99999,
+    "filter_feedback": 0.7,
+    "amp_decay": 0.9999999,
+    "osc_shape": "saw",
+    "oscillators": [
+        {"pitch": 0.5},
+        {"pitch": 1.998},
+        {"pitch": 1.002},
+        {"pitch": 1.496},
+        {"pitch": 0.500}
+    ]
+}
