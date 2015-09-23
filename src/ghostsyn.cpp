@@ -1,6 +1,7 @@
 #include "ghostsyn.hpp"
 #include <jack/midiport.h>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <json/json.h>
@@ -53,8 +54,12 @@ void GhostSyn::load_instrument(int channel, std::string filename) {
     std::string osc_shape = parsed["osc_shape"].asString();
     if (osc_shape == "saw") {
 	instr.shape = Instrument::SAW;
-    } else if (osc_shape == "square") {
-	instr.shape = Instrument::SQUARE;
+    } else if (osc_shape == "square1") {
+	instr.shape = Instrument::SQUARE1;
+    } else if (osc_shape == "square2") {
+	instr.shape = Instrument::SQUARE2;
+    } else if (osc_shape == "noise") {
+	instr.shape = Instrument::NOISE;
     }
     size_t osc_idx = 0;
     for (auto &osc : parsed["oscillators"]) {
@@ -110,14 +115,20 @@ double GhostSyn::oscillator(Voice &voice) {
     GhostSyn::Instrument &instr = instruments[voice.instrument];
     double osc_out = 0;
     for (size_t i = 0; i < instr.pitches.size(); ++i) {
-	if (instr.pitches[i] != 0) {
-	    voice.osc_ctr[i] += (double(GhostSyn::notetable[voice.note + 1]) *
-				 (1 << voice.octave) / 128) * instr.pitches[i] * voice.pitch;
-	    int32_t osc_int = (voice.osc_ctr[i] >> 1) - (1 << 30);
-	    if (instr.shape == Instrument::SQUARE) {
-		osc_int &= 0x80000000;
+	if (instr.shape == Instrument::NOISE) {
+	    osc_out += (rand() % 65536 - 32768) / 32768.0;
+	} else {
+	    if (instr.pitches[i] != 0) {
+		voice.osc_ctr[i] += (double(GhostSyn::notetable[voice.note + 1]) *
+				     (1 << voice.octave) / 128) * instr.pitches[i] * voice.pitch;
+		int32_t osc_int = (voice.osc_ctr[i] >> 1) - (1 << 30);
+		if (instr.shape == Instrument::SQUARE1) {
+		    osc_int &= 0x80000000;
+		} else if (instr.shape == Instrument::SQUARE2) {
+		    osc_int &= 0xc0000000;
+		}
+		osc_out += osc_int / (double(1LL << 32));
 	    }
-	    osc_out += osc_int / (double(1LL << 32));
 	}
     }
     return osc_out * voice.vol;

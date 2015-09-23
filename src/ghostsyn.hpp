@@ -49,7 +49,7 @@ private:
 	double pitch_decay = 0.0;
 	double pitch_min = 0.01;
 	std::vector<double> pitches;
-	enum {SAW, TRIANGLE, SQUARE} shape = SAW;
+	enum {SAW, TRIANGLE, NOISE, SQUARE1, SQUARE2} shape = SAW;
 
 	Instrument();
     };
