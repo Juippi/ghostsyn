@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <fstream>
 #include <json/json.h>
 
@@ -89,24 +90,11 @@ double GhostSyn::filter(double in, Voice &voice) {
     GhostSyn::Instrument &instr = instruments[voice.instrument];
     double fb_amt = instr.filter_fb * (voice.flt_co * 3.296875f - 0.00497436523438f);
     double feedback = fb_amt * (voice.flt_p1 - voice.flt_p2);
-
-    if (std::fpclassify(voice.flt_co) != FP_NORMAL &&
-	std::fpclassify(voice.flt_co) != FP_ZERO) {
-	voice.flt_co = 0.0;
-    }
     voice.flt_p1 = in * voice.flt_co +
 	voice.flt_p1 * (1 - voice.flt_co) +
-	feedback;
-    if (std::fpclassify(voice.flt_p1) != FP_NORMAL &&
-	std::fpclassify(voice.flt_p1) != FP_ZERO) {
-	voice.flt_p1 = 0.0;
-    }
+	feedback + std::numeric_limits<double>::min();
     voice.flt_p2 = voice.flt_p1 * voice.flt_co * 2 +
-	voice.flt_p2 * (1 - voice.flt_co * 2);
-    if (std::fpclassify(voice.flt_p2) != FP_NORMAL &&
-	std::fpclassify(voice.flt_p2) != FP_ZERO) {
-	voice.flt_p2 = 0.0;
-    }
+	voice.flt_p2 * (1 - voice.flt_co * 2) + std::numeric_limits<double>::min();
     
     return voice.flt_p2;
 }
@@ -136,9 +124,10 @@ double GhostSyn::oscillator(Voice &voice) {
 
 void GhostSyn::run_modulation(Voice &voice) {
     Instrument &instr = instruments[voice.instrument];
-    voice.flt_co *= instr.filter_decay;
-    voice.vol *= instr.amp_decay;
-    voice.pitch *= instr.pitch_decay;
+    // Kill denormal values to avoid spikes in CPU use
+    voice.flt_co *= instr.filter_decay + std::numeric_limits<double>::min();
+    voice.vol *= instr.amp_decay + std::numeric_limits<double>::min();
+    voice.pitch *= instr.pitch_decay + std::numeric_limits<double>::min();
     if (voice.pitch < instr.pitch_min) {
 	voice.pitch = instr.pitch_min;
     }
