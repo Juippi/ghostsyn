@@ -11,6 +11,7 @@ add_executable(ghostsyn
   compressor.cpp
   dcfilter.cpp
   delay.cpp
+  controller.cpp
   )
 
 target_compile_options(ghostsyn PRIVATE

@@ -17,10 +17,16 @@ GhostSyn::Voice::Voice()
 
 GhostSyn::Instrument::Instrument()
     : pitches(MAX_INSTRUMENT_OSCS, 0) {
+    
 }
 
 GhostSyn::GhostSyn()
     : instruments(MIDI_NUM_CHANNELS) {
+
+    for (auto &controller : filter_cutoff_mod) {
+	controller = Controller(0.1, 1.0, Controller::CTRL_LINEAR);
+    }
+
     jack = jack_client_open("ghostsyn", static_cast<jack_options_t>(0), NULL);
     jack_set_process_callback(jack, &::process, static_cast<void *>(this));
     audio_ports[0] = jack_port_register(jack, "left", JACK_DEFAULT_AUDIO_TYPE,
@@ -88,13 +94,14 @@ void GhostSyn::stop() {
 
 double GhostSyn::filter(double in, Voice &voice) {
     GhostSyn::Instrument &instr = instruments[voice.instrument];
-    double fb_amt = instr.filter_fb * (voice.flt_co * 3.296875f - 0.00497436523438f);
+    double cutoff = voice.flt_co * filter_cutoff_mod[voice.instrument].get_value();
+    double fb_amt = instr.filter_fb * (cutoff * 3.296875f - 0.00497436523438f);
     double feedback = fb_amt * (voice.flt_p1 - voice.flt_p2);
-    voice.flt_p1 = in * voice.flt_co +
-	voice.flt_p1 * (1 - voice.flt_co) +
+    voice.flt_p1 = in * cutoff +
+	voice.flt_p1 * (1 - cutoff) +
 	feedback + std::numeric_limits<double>::min();
-    voice.flt_p2 = voice.flt_p1 * voice.flt_co * 2 +
-	voice.flt_p2 * (1 - voice.flt_co * 2) + std::numeric_limits<double>::min();
+    voice.flt_p2 = voice.flt_p1 * cutoff * 2 +
+	voice.flt_p2 * (1 - cutoff * 2) + std::numeric_limits<double>::min();
     
     return voice.flt_p2;
 }
@@ -164,6 +171,18 @@ void GhostSyn::handle_note_off(int channel, int midi_note, int velocity) {
     }
 }
 
+void GhostSyn::handle_control_change(int channel, int control, int value) {
+    switch (control) {
+    case 0x01:
+	filter_cutoff_mod[channel].update(0, value); // TODO: timestamp in
+	break;
+    }
+}
+
+void GhostSyn::handle_pitch_bend(int channel, int value_1, int value_2) {
+    
+}
+
 void GhostSyn::handle_midi(jack_midi_event_t &event) {
     if (event.size >= 3) {
 	int status = event.buffer[0];
@@ -174,6 +193,9 @@ void GhostSyn::handle_midi(jack_midi_event_t &event) {
 	    break;
 	case MIDI_EV_NOTE_OFF:
 	    handle_note_off(channel, event.buffer[1], event.buffer[2]);
+	    break;
+	case MIDI_EV_CC:
+	    handle_control_change(channel, event.buffer[1], event.buffer[2]);
 	    break;
 	default:
 	    break;

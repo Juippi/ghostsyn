@@ -4,6 +4,7 @@
 #include "compressor.hpp"
 #include "dcfilter.hpp"
 #include "delay.hpp"
+#include "controller.hpp"
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <stdint.h>
@@ -20,7 +21,10 @@ private:
     static const int MIDI_STATUS_MASK_EVENT = 0xf0;
     static const int MIDI_EV_NOTE_OFF = 0x80;
     static const int MIDI_EV_NOTE_ON = 0x90;
-
+    static const int MIDI_EV_POLY_AFTERTOUCH = 0xa0;
+    static const int MIDI_EV_CC = 0xb0;
+    static const int MIDI_EV_AFTERTOUCH = 0xd0;
+    
     static const int MIDI_STATUS_MASK_CHANNEL = 0x0f;
 
     uint32_t notetable[13] {
@@ -68,11 +72,14 @@ private:
 	double flt_p1 = 0;
 	double flt_p2 = 0;
 
+
 	Voice();
     };
 
     std::vector<Instrument> instruments;
     Voice voices[POLYPHONY];
+
+    Controller filter_cutoff_mod[MIDI_NUM_CHANNELS];
 
     bool running = false;
     jack_client_t *jack;
@@ -88,6 +95,8 @@ private:
 
     void handle_note_on(int channel, int midi_note, int velocity);
     void handle_note_off(int channel, int midi_note, int velocity);
+    void handle_control_change(int channel, int control, int value);
+    void handle_pitch_bend(int channel, int value_1, int value_2);
     void handle_midi(jack_midi_event_t &event);
 
     double filter(double in, Voice &voice);
