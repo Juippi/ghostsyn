@@ -23,10 +23,20 @@ Requirements:
 Use
 ===
 
- $ ghostsyn <patch for MIDI ch 1> <patch for MIDI ch 2> ...
+$ ghostsyn <patch for MIDI ch 1> <patch for MIDI ch 2> ...
+
+There's a bunch of example patches in src/patches. The easiest way to get
+started is just to load them all on different midi channels with
+
+$ cd src && ./ghostsyn patches/*.patch
 
 Then just connect the outputs to audio outs, and MIDI port to your midi input.
 (QJackctl can be used for this).
+
+Realtime controls
+-----------------
+
+Pitch bend works, mod wheel adjusts filter cutoff.
 
 Editing
 =======
@@ -38,7 +48,7 @@ unstable if filter_feedback is set to > 1.0 (you don't want that).
 TODO
 ====
 
-* Realtime midi controls
+* More realtime controls, control value smoothing
 * Add separate downsampling filter, reduce oversample factor
 * Amplitude & filter envelopes
 * Effects (stereo delay, reverb, flanger/chorus etc.)

@@ -24,8 +24,11 @@ private:
     static const int MIDI_EV_POLY_AFTERTOUCH = 0xa0;
     static const int MIDI_EV_CC = 0xb0;
     static const int MIDI_EV_AFTERTOUCH = 0xd0;
+    static const int MIDI_EV_PITCH_BEND = 0xe0;
     
     static const int MIDI_STATUS_MASK_CHANNEL = 0x0f;
+
+    static constexpr double ENVELOPE_MIN = 1e-10;
 
     uint32_t notetable[13] {
 	0,
@@ -79,7 +82,8 @@ private:
     std::vector<Instrument> instruments;
     Voice voices[POLYPHONY];
 
-    Controller filter_cutoff_mod[MIDI_NUM_CHANNELS];
+    typedef enum {CTRL_FILTER_CUTOFF, CTRL_PITCH_BEND, NUM_CONTROLLER_TYPES} ControllerType;
+    Controller controllers[MIDI_NUM_CHANNELS][NUM_CONTROLLER_TYPES];
 
     bool running = false;
     jack_client_t *jack;

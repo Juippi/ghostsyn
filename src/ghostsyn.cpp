@@ -23,8 +23,13 @@ GhostSyn::Instrument::Instrument()
 GhostSyn::GhostSyn()
     : instruments(MIDI_NUM_CHANNELS) {
 
-    for (auto &controller : filter_cutoff_mod) {
-	controller = Controller(0.1, 1.0, Controller::CTRL_LINEAR);
+    for (auto &channel_controllers : controllers) {
+	channel_controllers[CTRL_FILTER_CUTOFF] = Controller(1.0, 0.1, 1.0,
+							     Controller::TYPE_LINEAR,
+							     Controller::RANGE_8BIT);
+	channel_controllers[CTRL_PITCH_BEND] = Controller(1.0, 0.94387, 1.05946, 1.0,
+							  Controller::TYPE_LINEAR,
+							  Controller::RANGE_14BIT);
     }
 
     jack = jack_client_open("ghostsyn", static_cast<jack_options_t>(0), NULL);
@@ -94,7 +99,7 @@ void GhostSyn::stop() {
 
 double GhostSyn::filter(double in, Voice &voice) {
     GhostSyn::Instrument &instr = instruments[voice.instrument];
-    double cutoff = voice.flt_co * filter_cutoff_mod[voice.instrument].get_value();
+    double cutoff = voice.flt_co * controllers[voice.instrument][CTRL_FILTER_CUTOFF].get_value();
     double fb_amt = instr.filter_fb * (cutoff * 3.296875f - 0.00497436523438f);
     double feedback = fb_amt * (voice.flt_p1 - voice.flt_p2);
     voice.flt_p1 = in * cutoff +
@@ -115,7 +120,8 @@ double GhostSyn::oscillator(Voice &voice) {
 	} else {
 	    if (instr.pitches[i] != 0) {
 		voice.osc_ctr[i] += (double(GhostSyn::notetable[voice.note + 1]) *
-				     (1 << voice.octave) / 128) * instr.pitches[i] * voice.pitch;
+				     (1 << voice.octave) / 128) *
+		    instr.pitches[i] * voice.pitch * controllers[voice.instrument][CTRL_PITCH_BEND].get_value();
 		int32_t osc_int = (voice.osc_ctr[i] >> 1) - (1 << 30);
 		if (instr.shape == Instrument::SQUARE1) {
 		    osc_int &= 0x80000000;
@@ -131,10 +137,17 @@ double GhostSyn::oscillator(Voice &voice) {
 
 void GhostSyn::run_modulation(Voice &voice) {
     Instrument &instr = instruments[voice.instrument];
-    // Kill denormal values to avoid spikes in CPU use
-    voice.flt_co *= instr.filter_decay + std::numeric_limits<double>::min();
-    voice.vol *= instr.amp_decay + std::numeric_limits<double>::min();
-    voice.pitch *= instr.pitch_decay + std::numeric_limits<double>::min();
+    if (voice.flt_co < ENVELOPE_MIN) {
+	voice.flt_co = 0;
+    } else {
+	voice.flt_co *= instr.filter_decay;
+    }
+    if (voice.vol < ENVELOPE_MIN) {
+	voice.vol = 0;
+    } else {
+	voice.vol *= instr.amp_decay;
+    }
+    voice.pitch = instr.pitch_decay * (voice.pitch + std::numeric_limits<double>::min());
     if (voice.pitch < instr.pitch_min) {
 	voice.pitch = instr.pitch_min;
     }
@@ -174,13 +187,15 @@ void GhostSyn::handle_note_off(int channel, int midi_note, int velocity) {
 void GhostSyn::handle_control_change(int channel, int control, int value) {
     switch (control) {
     case 0x01:
-	filter_cutoff_mod[channel].update(0, value); // TODO: timestamp in
+	controllers[channel][CTRL_FILTER_CUTOFF].update(0, value); // TODO: timestamp in
 	break;
     }
 }
 
 void GhostSyn::handle_pitch_bend(int channel, int value_1, int value_2) {
-    
+    // least significant & most significant 7 bits
+    int value = value_1 + 128 * value_2;
+    controllers[channel][CTRL_PITCH_BEND].update(0, value);
 }
 
 void GhostSyn::handle_midi(jack_midi_event_t &event) {
@@ -196,6 +211,9 @@ void GhostSyn::handle_midi(jack_midi_event_t &event) {
 	    break;
 	case MIDI_EV_CC:
 	    handle_control_change(channel, event.buffer[1], event.buffer[2]);
+	    break;
+	case MIDI_EV_PITCH_BEND:
+	    handle_pitch_bend(channel, event.buffer[1], event.buffer[2]);
 	    break;
 	default:
 	    break;
