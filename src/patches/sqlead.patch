@@ -4,6 +4,7 @@
     "filter_decay": 0.9999999,
     "filter_feedback": 0.7,
     "amp_decay": 1.0,
+    "pitch": 1.0,
     "pitch_decay": 1.0,
     "osc_shape": "square1",
     "oscillators": [

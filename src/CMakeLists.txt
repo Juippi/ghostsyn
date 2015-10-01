@@ -12,12 +12,16 @@ add_executable(ghostsyn
   dcfilter.cpp
   delay.cpp
   controller.cpp
+  instrument.cpp
+  voice.cpp
   )
 
 target_compile_options(ghostsyn PRIVATE
   -std=c++11
   -O2
   -ffast-math
+  -Wall
+  -Wextra
   )
 
 target_include_directories(ghostsyn PRIVATE
