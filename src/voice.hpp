@@ -27,6 +27,8 @@ public:
     int instrument = -1;
     int note = -1;
     int octave = -1;
+    bool pressed = false;
+    bool sustained = false;
     std::vector<uint32_t> osc_ctr;
 
     // Current voice params. Initialized from instrument on note on,
@@ -42,7 +44,6 @@ public:
     Voice();
     void set_on(int _instrument, int _note, int _octave, const Instrument &instrument_ref);
     void set_off();
-    bool is_on() const { return note >= 0; }
     void run_modulation();
 
     double run(std::vector<Controller> &rt_controls);

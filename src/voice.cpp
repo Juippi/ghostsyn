@@ -12,6 +12,8 @@ void Voice::set_on(int _instrument, int _note, int _octave, const Instrument &_i
     instrument = _instrument;
     note = _note;
     octave = _octave;
+    pressed = true;
+    sustained = false;
     std::copy(_instrument_ref.params.begin(), _instrument_ref.params.end(),
 	      params.begin());
     std::copy(_instrument_ref.osc_pitches.begin(), _instrument_ref.osc_pitches.end(),
@@ -20,7 +22,7 @@ void Voice::set_on(int _instrument, int _note, int _octave, const Instrument &_i
 }
 
 void Voice::set_off() {
-    note = -1;
+    pressed = false;
 }
 
 void Voice::run_modulation() {

@@ -37,6 +37,7 @@ private:
     // all notes playing on a channel, and do not modify instruments.
     typedef std::vector<Controller> RtControlSet;
     std::vector<RtControlSet> rt_controls;
+    std::vector<bool> sustain_controls;
 
     bool running = false;
     jack_client_t *jack;
