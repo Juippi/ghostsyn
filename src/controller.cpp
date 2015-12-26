@@ -18,8 +18,8 @@ Controller::Controller(double _initial, double _value_min, double _value_max,
 }
 
 Controller::Controller(double _initial, double _value_min, double _value_max,
-		       Type _type, Range _range) {
-    Controller(_initial, _value_min, _value_max, -1.0, _type, _range);
+		       Type _type, Range _range)
+    : Controller(_initial, _value_min, _value_max, -1.0, _type, _range) {
 }
 
 void Controller::update(unsigned long long timestamp, int midi_value) {
