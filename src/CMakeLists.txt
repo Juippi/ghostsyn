@@ -5,6 +5,8 @@ include(FindPkgConfig)
 pkg_check_modules(JACK jack)
 pkg_check_modules(JSONCPP jsoncpp)
 
+set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -ffast-math -Wall -Wextra")  
+
 add_executable(ghostsyn
   main.cpp
   ghostsyn.cpp
@@ -16,14 +18,6 @@ add_executable(ghostsyn
   voice.cpp
   )
 
-target_compile_options(ghostsyn PRIVATE
-  -std=c++11
-  -O2
-  -ffast-math
-  -Wall
-  -Wextra
-  )
-
 target_include_directories(ghostsyn PRIVATE
   ${JACK_INCLUDE_DIRS}
   ${JSONCPP_INCLUDE_DIRS}
@@ -33,3 +27,17 @@ target_link_libraries(ghostsyn
   ${JACK_LIBRARIES}
   ${JSONCPP_LIBRARIES}
   )
+
+enable_testing()
+
+add_executable(test_ghostsyn
+  test_controller.cpp
+  controller.cpp
+  )
+
+target_link_libraries(test_ghostsyn
+  boost_unit_test_framework
+  )
+
+add_test(NAME ghostsyn
+  COMMAND test_ghostsyn)
