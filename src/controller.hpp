@@ -9,19 +9,26 @@ public:
     typedef enum {RANGE_8BIT, RANGE_14BIT} Range;
 private:
     unsigned long long prev_timestamp = std::numeric_limits<unsigned long long>::max();
-    int prev_midi_value = 0;
-    double value = 0.0;
+
+    Type type = TYPE_LINEAR;
+
     double value_min = 0.0;
     double value_max = 1.0;
-    // If midpoint < 0.0, no midpoint -> controller symmetric around min & max average
-    double midpoint = -1.0;
-    double range_divisor = 127.0;
-    Type type = TYPE_LINEAR;
+    
+    int midi_midpoint = 63;
+    double value_midpoint = 0.5;
+       
+    double range_divisor_upper = 127.0;
+    double range_divisor_lower = 127.0;
+
+    // Current output value of controller
+    double value = 0.0;
 public:
     Controller();
-    Controller(double _initial, double _value_min, double _value_max, Type _type, Range _range);
-    Controller(double _initial, double _value_min, double _value_max, double _midpoint,
-	       Type _type, Range _range);
+    Controller(Type _type, Range _range,
+	       double _value_min, double _value_max,
+	       int _midi_midpoint, double _value_midpoint,
+	       double _initial_midi);
     void update(unsigned long long timestamp, int midi_value);
     double get_value() const { return value; }
 };

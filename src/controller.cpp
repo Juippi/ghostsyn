@@ -1,40 +1,50 @@
 #include "controller.hpp"
+#include <algorithm>
 
 Controller::Controller() {
 }
 
-Controller::Controller(double _initial, double _value_min, double _value_max,
-		       double _midpoint, Type _type, Range _range)
-    : value(_initial), value_min(_value_min), value_max(_value_max),
-      midpoint(_midpoint), type(_type) {
-    switch (_range) {
-    case RANGE_8BIT:
-	range_divisor = 127.0;
-	break;
-    case RANGE_14BIT:
-	range_divisor = 8192.0;
-	break;
+Controller::Controller(Type _type, Range _range,
+		       double _value_min, double _value_max,
+		       int _midi_midpoint, double _value_midpoint,
+		       double _initial_midi)
+    : type(_type), value_min(_value_min), value_max(_value_max),
+      midi_midpoint(_midi_midpoint), value_midpoint(_value_midpoint) {
+    int max_midi_value;
+    if (_range == RANGE_8BIT) {
+	max_midi_value = (2 << 7) - 1;
+    } else { // RANGE_14BIT
+	max_midi_value = (2 << 14) - 1;
     }
-}
+    
+    if (midi_midpoint < 0) {
+	midi_midpoint = 0;
+    } else if (midi_midpoint > max_midi_value) {
+	midi_midpoint = max_midi_value;
+    }
+    
+    if (midi_midpoint == 0) {
+	range_divisor_lower = 1.0;
+    } else {
+	range_divisor_lower = double(midi_midpoint);
+    }
+    if (midi_midpoint == 127) {
+	range_divisor_upper = 1.0;
+    } else {
+	range_divisor_upper = double(max_midi_value - midi_midpoint);
+    }
 
-Controller::Controller(double _initial, double _value_min, double _value_max,
-		       Type _type, Range _range)
-    : Controller(_initial, _value_min, _value_max, -1.0, _type, _range) {
+    update(0, _initial_midi);
 }
 
 void Controller::update(unsigned long long timestamp, int midi_value) {
     switch (type) {
     case TYPE_LINEAR:
-	if (midpoint >= 0.0) {
-	    if (midi_value > 8192) {
-		midi_value -= 8192;
-		value = midpoint + (value_max - midpoint) * midi_value / range_divisor;
-	    } else {
-		value = value_min + (midpoint - value_min) * midi_value / range_divisor;
-	    }
+	if (midi_value > midi_midpoint) {
+	    midi_value -= midi_midpoint;
+	    value = value_midpoint + (value_max - value_midpoint) * midi_value / range_divisor_upper;
 	} else {
-	    value = value_min + (value_max - value_min) * midi_value / range_divisor;
+	    value = value_min + (value_midpoint - value_min) * midi_value / range_divisor_lower;
 	}
-	break;
     }
 }

@@ -17,12 +17,16 @@ GhostSyn::GhostSyn()
     rt_controls.resize(MIDI_NUM_CHANNELS);
     for (auto &ctrl_set : rt_controls) {
 	ctrl_set.resize(RT_NUM_TYPES);
-	ctrl_set[RT_FILTER_CUTOFF] = Controller(1.0, 0.1, 1.0,
-						Controller::TYPE_LINEAR,
-						Controller::RANGE_8BIT);
-	ctrl_set[RT_PITCH_BEND] = Controller(1.0, 0.94387, 1.05946, 1.0,
-					     Controller::TYPE_LINEAR,
-					     Controller::RANGE_14BIT);
+	ctrl_set[RT_FILTER_CUTOFF] = Controller(Controller::TYPE_LINEAR,
+						Controller::RANGE_8BIT,
+						0.1, 1.0,
+						63, 0.55,
+						63);
+	ctrl_set[RT_PITCH_BEND] = Controller(Controller::TYPE_LINEAR,
+					     Controller::RANGE_14BIT,
+					     0.94387, 1.05946,
+					     8192, 1.0,
+					     8192);
     }
     
     jack = jack_client_open("ghostsyn", static_cast<jack_options_t>(0), NULL);
