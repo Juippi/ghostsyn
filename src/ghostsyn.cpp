@@ -1,4 +1,5 @@
 #include "ghostsyn.hpp"
+#include "utils.hpp"
 #include <jack/midiport.h>
 #include <cmath>
 #include <cstdlib>
@@ -65,6 +66,7 @@ void GhostSyn::stop() {
 }
 
 void GhostSyn::handle_note_on(int channel, int midi_note, int velocity) {
+    unused(velocity);
     // TODO: note stealing
     int idx = 0;
     Instrument &instr = instruments[channel];
@@ -89,6 +91,7 @@ void GhostSyn::handle_note_on(int channel, int midi_note, int velocity) {
 }
 
 void GhostSyn::handle_note_off(int channel, int midi_note, int velocity) {
+    unused(velocity);
     int note = midi_note % 12;
     int octave = midi_note / 12;
     for (auto &voice : voices) {

@@ -1,4 +1,5 @@
 #include "controller.hpp"
+#include "utils.hpp"
 #include <algorithm>
 
 Controller::Controller() {
@@ -38,6 +39,7 @@ Controller::Controller(Type _type, Range _range,
 }
 
 void Controller::update(unsigned long long timestamp, int midi_value) {
+    unused(timestamp);
     switch (type) {
     case TYPE_LINEAR:
 	if (midi_value > midi_midpoint) {
