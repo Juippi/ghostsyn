@@ -41,3 +41,7 @@ target_link_libraries(test_ghostsyn
 
 add_test(NAME ghostsyn
   COMMAND test_ghostsyn)
+
+add_library(ghostsyn_lv2 SHARED
+  lv2/lv2_plugin.cpp
+  )

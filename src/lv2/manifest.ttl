@@ -1,0 +1,4 @@
+<http://example.com/plugins/lv2_ghostsyn.ddl>
+        a lv2:Plugin ;
+        lv2:binary <lv2_ghostsyn.so>  ;
+        rdfs:seeAlso <lv2_ghostsyn.ttl> .
