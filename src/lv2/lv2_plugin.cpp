@@ -5,6 +5,7 @@
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../ghostsyn.hpp"
 
@@ -127,5 +128,16 @@ static const LV2_Descriptor descriptor = {
     cleanup,
     extension_data
 };
+
+LV2_SYMBOL_EXPORT
+const LV2_Descriptor *lv2_descriptor(uint32_t index) {
+    printf("getto\n");
+    switch (index) {
+    case 0:
+	return &descriptor;
+    default:
+	return NULL;
+    }
+}
 
 }; // extern "C"
