@@ -45,3 +45,9 @@ add_test(NAME ghostsyn
 add_library(ghostsyn_lv2 SHARED
   lv2/lv2_plugin.cpp
   )
+
+install(TARGETS ghostsyn_lv2
+  DESTINATION lib/lv2/ghostsyn.lv2)
+
+install(FILES lv2/lv2_ghostsyn.ttl lv2/manifest.ttl
+  DESTINATION lib/lv2/ghostsyn.lv2)
