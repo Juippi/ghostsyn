@@ -1,4 +1,8 @@
-<http://example.com/plugins/lv2_ghostsyn.ddl>
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
+
+<http://example.com/plugins/lv2_ghostsyn>
         a lv2:Plugin ;
-        lv2:binary <lv2_ghostsyn.so>  ;
+        lv2:binary <libghostsyn_lv2.so>  ;
         rdfs:seeAlso <lv2_ghostsyn.ttl> .

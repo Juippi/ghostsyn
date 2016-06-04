@@ -1,24 +1,26 @@
+@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .
 @prefix doap:  <http://usefulinc.com/ns/doap#> .
 @prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
 
-	lv2_project <http://example.com/plugins/lv2_ghostsyn> ;
-
+<http://example.com/plugins/lv2_ghostsyn>
+	a lv2:Plugin ;
 	doap:name "Ghostsyn" ;
-	doap_license <http://example.com/license> ;
+	doap:license <http://example.com/license> ;
 
 	lv2:port [
 	
-		a lv2:InputPort,
-		  lv2:AtomPort ;
+		a lv2:InputPort ,
+		  atom:AtomPort ;
 		atom:bufferType atom:Sequence ;
 		atom:supports midi:MidiEvent ;
 		lv2:designation lv2:control ;
 		lv2:index 0 ;
-		lv2:name "MIDI In"
-		lv2:symbol "midi_in" ;
+		lv2:name "MIDI In" ;
+		lv2:symbol "midi_in"
 		
 		] , [
 		
@@ -35,5 +37,5 @@
 		lv2:index 2 ;
 		lv2:symbol "out_r" ;
 		lv2:name "Out Right"
-		
+
 		] .
