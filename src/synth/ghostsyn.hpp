@@ -19,7 +19,6 @@ private:
     static const unsigned int OVERSAMPLE_FACTOR = 16;
     static const unsigned int POLYPHONY = 8;
 
-    static const int MIDI_NUM_CHANNELS = 16;
     static const int MIDI_STATUS_MASK_EVENT = 0xf0;
     static const int MIDI_EV_NOTE_OFF = 0x80;
     static const int MIDI_EV_NOTE_ON = 0x90;
@@ -64,6 +63,8 @@ public:
     void run();
     void stop();
     int process(jack_nframes_t nframes);
+
+    static const int MIDI_NUM_CHANNELS = 16;
 };
 
 #endif // _GHOSTSYN_H_

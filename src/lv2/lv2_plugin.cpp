@@ -4,10 +4,16 @@
 #include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <boost/filesystem.hpp>
+#include <regex>
+#include <set>
+#include <string>
+#include <iostream>
 
-#include "../ghostsyn.hpp"
+#include "ghostsyn.hpp"
+
+namespace fs = boost::filesystem;
 
 /**
  * LV2 plugin wrapper for Ghostsyn
@@ -16,6 +22,7 @@
  */
 
 #define GHOSTSYN_URI "http://example.com/plugins/lv2_ghotsyn"
+#define INSTRUMENT_DIR "./patches/"
 
 typedef enum {
     MIDI_IN = 0,
@@ -35,13 +42,42 @@ typedef struct {
     } uris;
 } GhostsynStruct;
 
+void load_instruments(GhostSyn *synth, const std::string dir) {
+    fs::path path(dir.c_str());
+    std::set<std::string> patch_files;
+    try {
+	const std::regex patch_name_regex(".*[.]patch$");
+	for (auto &entry : fs::directory_iterator(path)) {
+	    if (fs::is_regular_file(entry.path()) &&
+		std::regex_match(entry.path().filename().string(), patch_name_regex)) {
+		// Use std::set to sort patches to get deterministic
+		// channel assignment.
+		patch_files.insert(entry.path().string());
+	    }
+	}
+
+	int channel = 0;
+	for (auto &patch_file : patch_files) {
+	    if (channel >= GhostSyn::MIDI_NUM_CHANNELS) {
+		break;
+	    }
+	    synth->load_instrument(channel, patch_file);
+	    ++channel;
+	}
+		     
+    } catch (const fs::filesystem_error &e) {
+	std::cerr << "Warning: filesystem error " << e.what()
+		  << " when loading patches" << std::endl;
+    }
+}
+
 extern "C" {
     
 static LV2_Handle instantiate(const LV2_Descriptor* /* descriptor */,
 			      double /* rate */,
 			      const char*  /* bundle_path */,
 			      const LV2_Feature* const* features) {
-    LV2_URID_Map* map = NULL;
+    LV2_URID_Map *map = NULL;
     for (int i = 0; features[i]; ++i) {
 	if (!strcmp(features[i]->URI, LV2_URID__map)) {
 	    map = (LV2_URID_Map*)features[i]->data;
@@ -53,6 +89,10 @@ static LV2_Handle instantiate(const LV2_Descriptor* /* descriptor */,
     self->synth = new GhostSyn();
     self->map = map;
     self->uris.midi_MidiEvent = map->map(map->handle, LV2_MIDI__MidiEvent);
+
+    // Load instruments. TODO: support run-time patch reloading
+    // by using a worker thread instead?
+    load_instruments(self->synth, INSTRUMENT_DIR);
 
     return (LV2_Handle)self;
 }
@@ -131,7 +171,6 @@ static const LV2_Descriptor descriptor = {
 
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor *lv2_descriptor(uint32_t index) {
-    printf("getto\n");
     switch (index) {
     case 0:
 	return &descriptor;

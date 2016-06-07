@@ -6,7 +6,6 @@
 #include <iostream>
 #include <limits>
 #include <fstream>
-#include <json/json.h>
 
 int process(jack_nframes_t nframes, void *arg) {
     return static_cast<GhostSyn *>(arg)->process(nframes);
