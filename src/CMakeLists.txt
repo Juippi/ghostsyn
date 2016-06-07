@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 include(FindPkgConfig)
 
-pkg_check_modules(JACK jack)
+#pkg_check_modules(JACK jack)
 pkg_check_modules(JSONCPP jsoncpp)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -ffast-math -Wall -Wextra")
@@ -54,6 +54,11 @@ add_library(ghostsyn_lv2 SHARED
 
 target_include_directories(ghostsyn_lv2 PRIVATE
   ${JSONCPP_INCLUDE_DIRS}
+  )
+
+target_link_libraries(ghostsyn_lv2 LINK_PUBLIC
+  ${JSONCPP_LIBRARIES}
+  boost_filesystem
   )
 
 install(TARGETS ghostsyn_lv2

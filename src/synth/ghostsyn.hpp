@@ -8,8 +8,6 @@
 #include "instrument.hpp"
 #include "voice.hpp"
 #include "rt_controls.hpp"
-#include <jack/jack.h>
-#include <jack/midiport.h>
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -38,11 +36,6 @@ private:
     std::vector<RtControlSet> rt_controls;
     std::vector<bool> sustain_controls;
 
-    bool running = false;
-    jack_client_t *jack;
-    jack_port_t *audio_ports[2];
-    jack_port_t *midi_port;
-
     unsigned int oversample_ctr = 0;
     double oversample_sum = 0.0;
 
@@ -50,20 +43,17 @@ private:
     Compressor master_comp;
     DCFilter master_dcfilter;
 
+public:
+    GhostSyn();
+    ~GhostSyn();
+
+    void load_instrument(int channel, std::string filename);
+    void render(float *out_buf[2], uint32_t offset, uint32_t sample_count);
+
     void handle_note_on(int channel, int midi_note, int velocity);
     void handle_note_off(int channel, int midi_note, int velocity);
     void handle_control_change(int channel, int control, int value);
     void handle_pitch_bend(int channel, int value_1, int value_2);
-    void handle_midi(jack_midi_event_t &event);
-
-public:
-    GhostSyn();
-    ~GhostSyn();
-    void load_instrument(int channel, std::string filename);
-    void run();
-    void stop();
-    int process(jack_nframes_t nframes);
-
     static const int MIDI_NUM_CHANNELS = 16;
 };
 

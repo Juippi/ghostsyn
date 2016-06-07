@@ -21,7 +21,7 @@ namespace fs = boost::filesystem;
  * Based on the lv2 plugin examples at http://lv2plug.in/git/cgit.cgi/lv2.git/
  */
 
-#define GHOSTSYN_URI "http://example.com/plugins/lv2_ghotsyn"
+#define GHOSTSYN_URI "http://example.com/plugins/lv2_ghostsyn"
 #define INSTRUMENT_DIR "./patches/"
 
 typedef enum {
@@ -34,7 +34,7 @@ typedef struct {
     GhostSyn *synth;
     
     const LV2_Atom_Sequence *midi_in;
-    const float *audio_out[2];
+    float *audio_out[2];
 
     LV2_URID_Map* map;
     struct {
@@ -107,15 +107,16 @@ static void connect_port(LV2_Handle instance,
 	self->midi_in = (const LV2_Atom_Sequence *)data;
 	break;
     case OUT_LEFT:
-	self->audio_out[0] = (const float *)data;
+	self->audio_out[0] = static_cast<float *>(data);
 	break;
     case OUT_RIGHT:
-	self->audio_out[1] = (const float *)data;
+	self->audio_out[1] = static_cast<float *>(data);
 	break;
     }
 }
 
 static void activate(LV2_Handle instance) {
+    (void)instance;
 }
 
     static void run(LV2_Handle instance, uint32_t sample_count) {
@@ -127,25 +128,24 @@ static void activate(LV2_Handle instance) {
 	    const uint8_t* const msg = (const uint8_t*)(ev + 1);
 	    switch (lv2_midi_message_type(msg)) {
 	    case LV2_MIDI_MSG_NOTE_ON:
-		// TODO
+		self->synth->handle_note_on(msg[0] & 0x0f, msg[1], msg[2]);
 		break;
 	    case LV2_MIDI_MSG_NOTE_OFF:
-		// TODO
+		self->synth->handle_note_off(msg[0] & 0x0f, msg[1], msg[2]);
 		break;
 	    default:
 		break;
 	    }
 	}
 
-	// TODO: write N frames to both output ports
-	// write_output(self, offset, ev->time.frames - offset);
+	self->synth->render(self->audio_out, offset, ev->time.frames - offset);
 	offset = (uint32_t)ev->time.frames;
     }
-    // TODO: write the remainder, if any
-    // write_output(self, offset, sample_count - offset);
+    self->synth->render(self->audio_out, offset, sample_count - offset);
 }
 
 static void deactivate(LV2_Handle instance) {
+    (void)instance;
 }
 
 static void cleanup(LV2_Handle instance) {
@@ -155,6 +155,7 @@ static void cleanup(LV2_Handle instance) {
 }
 
 static const void* extension_data(const char *uri) {
+    (void)uri;
     return NULL;
 }
 
