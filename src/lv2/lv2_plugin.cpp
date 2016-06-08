@@ -119,7 +119,8 @@ static void activate(LV2_Handle instance) {
     (void)instance;
 }
 
-    static void run(LV2_Handle instance, uint32_t sample_count) {
+
+static void run(LV2_Handle instance, uint32_t sample_count) {
     GhostsynStruct *self = (GhostsynStruct *)instance;
     uint32_t offset = 0;
 
@@ -132,6 +133,9 @@ static void activate(LV2_Handle instance) {
 		break;
 	    case LV2_MIDI_MSG_NOTE_OFF:
 		self->synth->handle_note_off(msg[0] & 0x0f, msg[1], msg[2]);
+		break;
+	    case LV2_MIDI_MSG_CONTROLLER:
+		self->synth->handle_control_change(msg[0] & 0x0f, msg[1], msg[2]);
 		break;
 	    default:
 		break;

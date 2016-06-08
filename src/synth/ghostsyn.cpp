@@ -97,6 +97,13 @@ void GhostSyn::handle_control_change(int channel, int control, int value) {
 
 void GhostSyn::render(float *out_buf[2], uint32_t offset, uint32_t sample_count) {
     for (uint32_t frame = 0; frame < sample_count;) {
+
+	for (auto &voice : voices) {
+	    if (voice.pressed || voice.sustained) {
+		oversample_sum += voice.run(rt_controls[voice.instrument]);
+	    }
+	}
+
 	if (++oversample_ctr == OVERSAMPLE_FACTOR) {
 	    double sum = oversample_sum / OVERSAMPLE_FACTOR;
 	    double fx_1[2];
