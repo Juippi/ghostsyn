@@ -1,0 +1,173 @@
+{ "instruments":
+  [
+      { "name": "keys1",
+	
+	"modules": [
+	    {
+		"type": "oscillator",
+		"tracker_ctl": true,
+		
+		"stereo": true,
+		"out": 2,
+		"gain": 0.10,
+		"op": "set",
+		"add": 0.0,
+		"detune2": 2.02
+	    },
+
+	    {
+		"type": "envelope",
+		"tracker_ctl": true,
+		
+		"out": 1,
+		"out_param": 3,
+		"op": "set",
+		"attack": 0.004,
+		"switch": 0.5,
+		"release": 0.99992
+	    },
+    
+	    {
+		"type": "filter",
+		"out": -1,
+		"op": "set",
+		"cutoff": 0.0,
+		"feedback": 0.5
+	    }
+	]
+      },
+
+      { "name": "lead",
+
+	"modules": [
+	    {
+		"type": "oscillator",
+		"tracker_ctl": true,
+		
+		"stereo": false,
+		"out": 2,
+		"gain": 0.3,
+		"op": "set",
+		"add": 0.0,
+		"detune2": 2.002
+	    },
+
+	    {
+		"type": "envelope",
+		"tracker_ctl": true,
+		
+		"out": 1,
+		"out_param": 3,
+		"op": "set",
+		"attack": 0.004,
+		"switch": 0.25,
+		"release": 0.9997
+	    },
+	    
+	    {
+		"type": "filter",
+		"out": 1,
+		"op": "add",
+		"cutoff": 0.0,
+		"feedback": 0.6
+	    },
+	    
+	    {
+		"type": "delay",
+		"out": -1,
+		"op": "set",
+		"time": 40000,
+		"feedback": 0.7
+	    }
+
+	]
+      },
+      
+      { "name": "pad",
+
+	"modules": [
+	    {
+		"type": "oscillator",
+		"tracker_ctl": true,
+		
+		"stereo": true,
+		"out": 2,
+		"gain": 0.15,
+		"op": "set",
+		"add": 0.0,
+		"detune2": 1.26
+	    },
+
+	    {
+		"type": "envelope",
+		"tracker_ctl": true,
+		
+		"out": 1,
+		"out_param": 3,
+		"op": "set",
+		"attack": 0.0000012,
+		"switch": 0.20,
+		"release": 0.99996
+	    },
+	    
+	    {
+		"type": "filter",
+		"out": -1,
+		"op": "add",
+		"cutoff": 0.0,
+		"feedback": 0.8
+	    }
+	]
+      },
+
+      { "name": "end_pad",
+
+	"modules": [
+	    {
+		"type": "oscillator",
+		"tracker_ctl": true,
+		
+		"stereo": true,
+		"out": 3,
+		"gain": 0.24,
+		"op": "set",
+		"add": 0.0,
+		"detune2": 1.502
+	    },
+
+	    {
+		"type": "envelope",
+		"tracker_ctl": true,
+		
+		"out": 2,
+		"out_param": 3,
+		"op": "set",
+		"attack": 0.0000012,
+		"switch": 0.16,
+		"release": 0.999996
+	    },
+
+	    {
+		"type": "oscillator",
+		"tracker_ctl": true,
+		
+		"stereo": false,
+		"out": 1,
+		"out_param": 3,
+		"gain": 0.12,
+		"op": "add",
+		"add": 0.0002,
+		"detune2": 1.0
+	    },
+	    
+	    {
+		"type": "filter",
+		"out": -1,
+		"op": "add",
+		"cutoff": 0.0,
+		"feedback": 0.8
+	    }
+	]
+      } 
+  ]
+}
