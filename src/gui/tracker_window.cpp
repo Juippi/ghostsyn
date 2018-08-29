@@ -467,7 +467,13 @@ void TrackerWindow::update() {
 	    o_text << " ";
 	}
 	o_text << (n + 1);
-	draw_text_hw(order_x(order_idx), order_y(order_idx), o_text.str());
+	if ((order_idx + order_idx / 18) % 2 == 0) {
+	    draw_text_hw(order_x(order_idx), order_y(order_idx), o_text.str(),
+			 default_color_fg, colors.order_bg_1);
+	} else {
+	    draw_text_hw(order_x(order_idx), order_y(order_idx), o_text.str(),
+			 default_color_fg, colors.order_bg_2);
+	}
 	++order_idx;
     }
 

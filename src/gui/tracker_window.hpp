@@ -47,6 +47,8 @@ protected:
 	const Color tracker_bg = {20, 20, 0, 255};
 	const Color play_cursor = {160, 100, 20, 255};
 	const Color instrument_num = {130, 130, 130, 255};
+	const Color order_bg_1 = {50, 50, 90, 255};
+	const Color order_bg_2 = {20, 20, 50, 255};
     } colors;
     const unsigned int octave_min = 0;
     const unsigned int octave_max = 8;
