@@ -7,7 +7,8 @@ const std::map<Module::ModuleType, std::string> Module::type_names = {
     {TYPE_FILTER, "filter"},
     {TYPE_ENV, "envelope"},
     {TYPE_COMP, "compressor"},
-    {TYPE_DELAY, "delay"}
+    {TYPE_DELAY, "delay"},
+    {TYPE_CHORUS, "chorus"}
 };
 
 const std::map<std::string, Module::ModuleType> Module::name_types = {
@@ -15,7 +16,8 @@ const std::map<std::string, Module::ModuleType> Module::name_types = {
 	{"filter", TYPE_FILTER},
 	{"envelope", TYPE_ENV},
 	{"compressor", TYPE_COMP},
-	{"delay", TYPE_DELAY}
+	{"delay", TYPE_DELAY},
+	{"chorus", TYPE_CHORUS}
 };
 
 // Convert floating point value to byte array & truncate to N bits
@@ -40,6 +42,8 @@ std::string Module::type2str(int _type) {
 	return "TYPE_COMP";
     case TYPE_DELAY:
 	return "TYPE_DELAY";
+    case TYPE_CHORUS:
+	return "TYPE_CHORUS";
     default:
 	return "unknown";
     }
@@ -114,15 +118,21 @@ Module::Module(ModuleType type_)
 	params.push_back(Param("stage", 1));
 	break;
     case TYPE_COMP:
-    	params.push_back(Param("input", 0.0f));
-    	params.push_back(Param("threshold", 0.5f));
-    	params.push_back(Param("attack", 0.99f));
+	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("threshold", 0.5f));
+	params.push_back(Param("attack", 0.99f));
 	params.push_back(Param("release", 0.001f));
 	break;
     case TYPE_DELAY:
-    	params.push_back(Param("input", 0.0f));
-    	params.push_back(Param("time", 10000));
-    	params.push_back(Param("feedback", 0.1f));
+	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("time", 10000));
+	params.push_back(Param("feedback", 0.1f));
+	break;
+    case TYPE_CHORUS:
+	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("time", 0.0f));
+	params.push_back(Param("freq", 0.0f));
+	params.push_back(Param("modamp", 0.0f));
 	break;
     }
     params.resize(4);
@@ -167,6 +177,12 @@ void Module::from_json(Json::Value &json, int my_index) {
 	params.push_back(Param("input", 0.0f));
 	params.push_back(Param("time", params_json["time"].asInt()));
 	params.push_back(Param("feedback", params_json["feedback"].asFloat()));
+	break;
+    case TYPE_CHORUS:
+	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("time", params_json["time"].asFloat()));
+	params.push_back(Param("freq", params_json["feedback"].asFloat()));
+	params.push_back(Param("modamp", params_json["modamp"].asFloat()));
 	break;
     default:
 	throw TDError("Unrecognized module type: ", json["type"].asString());

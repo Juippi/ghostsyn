@@ -16,10 +16,6 @@ global_volume:
 end_fade:
 	dd 0.99998
 
-;;; for delay dry/wet mix
-delay_dry:
-	dd 0.4
-
 ;;; other constants
 stereo_mod:
 	dd 1.003	; adjustment for 2nd ch. TODO: could be osc param?
@@ -31,7 +27,7 @@ oct_semitones:
 
 	%define	MODULE_DATA_SIZE 6
 	%define MODULE_DATA_BYTES MODULE_DATA_SIZE * 4
-	%define MODULE_WORK_BYTES 4096
+	%define MODULE_WORK_BYTES 65536
 
 	%define NUM_TRACKS 8
 	%define NUM_ROWS 48
@@ -63,6 +59,7 @@ oct_semitones:
 	%define MODULE_TYPE_ENV        0x02
 	%define MODULE_TYPE_COMPRESSOR 0x03
 	%define MODULE_TYPE_DELAY      0x04
+	%define MODULE_TYPE_CHORUS      0x05
 	;; special type used for masking unused elements in non-compact builds
 	%define MODULE_TYPE_SILENCE       0x0f
 
@@ -145,6 +142,10 @@ section .text
 %ifdef ENABLE_DELAY
 %include "module_delay.asm"
 %endif ;; ENABLE_DELAY
+
+%ifdef ENABLE_CHORUS
+%include "module_chorus.asm"
+%endif ;; ENABLE_CHORUS
 
 ;;;
 ;;; synth main
@@ -529,6 +530,13 @@ no_compressor:
 	call module_delay
 no_delay:
 	%endif
+
+%ifdef ENABLE_CHORUS
+	cmp al, MODULE_TYPE_CHORUS
+	jne no_chorus
+	call module_chorus
+no_chorus:
+%endif
 
 %ifdef ENABLE_SILENCE
 	cmp al, MODULE_TYPE_SILENCE

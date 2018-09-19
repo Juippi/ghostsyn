@@ -10,7 +10,7 @@ class Module {
 private:
     static std::string type2str(int type);
 public:
-    typedef enum {TYPE_OSC, TYPE_FILTER, TYPE_ENV, TYPE_COMP, TYPE_DELAY} ModuleType;
+    typedef enum {TYPE_OSC, TYPE_FILTER, TYPE_ENV, TYPE_COMP, TYPE_DELAY, TYPE_CHORUS} ModuleType;
 
     Module();
     Module(Json::Value &json, int my_index);

@@ -157,6 +157,9 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
     action_buttons.push_back(Button("New comp",
 				    std::bind(&PatchEditorWindow::new_module, this, Module::TYPE_COMP),
 				    10 + 162 + 8, 10, 162));
+    action_buttons.push_back(Button("New cho",
+				    std::bind(&PatchEditorWindow::new_module, this, Module::TYPE_CHORUS),
+				    10 + 162 + 8, 10 + Button::default_height + 8, 162));
     action_buttons.push_back(Button("Del module",
 				    std::bind(&PatchEditorWindow::del_module, this),
 				    10 + (162 + 8) * 2, 10, 162));

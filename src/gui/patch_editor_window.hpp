@@ -65,7 +65,8 @@ class PatchEditorWindow : public EditorWindow {
 	{Module::TYPE_FILTER, "flt"},
 	{Module::TYPE_ENV, "env"},
 	{Module::TYPE_COMP, "cmp"},
-	{Module::TYPE_DELAY, "dly"}
+	{Module::TYPE_DELAY, "dly"},
+	{Module::TYPE_CHORUS, "cho"}
     };
 
     // Labels for displayed param values for each module type
@@ -75,6 +76,7 @@ class PatchEditorWindow : public EditorWindow {
 	{Module::TYPE_ENV, {"att ", "swtc", "dcay", "stg "}},
 	{Module::TYPE_COMP, {"in  ", "thre", "att ", "rel "}},
 	{Module::TYPE_DELAY, {"in  ", "len ", "fdbk", "   "}},
+	{Module::TYPE_CHORUS, {"in", "time", "madd", "mamp"}}
     };
 
     static constexpr int MASTER_OUT_IDX = 0;
