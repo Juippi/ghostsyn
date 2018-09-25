@@ -18,16 +18,16 @@
 %define ENABLE_SILENCE	
 
 song_ticklen:
-	resd 1
+	dd 0
 
 elements:
-	resd MODULE_DATA_BYTES * TRACKER_MAX_MODULES
+	times (MODULE_DATA_BYTES * TRACKER_MAX_MODULES) dd 0
 
 order:
-	resb TRACKER_MAX_ORDER
+	times TRACKER_MAX_ORDER db 0
 
 patterns:
-	resb NUM_TRACKS * NUM_ROWS * TRACKER_MAX_PATTERNS
+	times (NUM_TRACKS * NUM_ROWS * TRACKER_MAX_PATTERNS) db 0
 
 trigger_points:
 	;; each track can trigger two instruments.
@@ -38,7 +38,7 @@ trigger_points:
 	;;
 	;; or alternatively, 4 independent triggers per instrument
 	;; in non-compact mode
-	resd NUM_TRACKS * 2 * 4
+	times (NUM_TRACKS * 2 * 4) dd 0
 
 module_skip_flags:
-	resb NUM_TRACKS * NUM_MODULES
+	times (NUM_TRACKS * NUM_MODULES) db 0
