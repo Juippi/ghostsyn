@@ -1,7 +1,38 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <boost/range/irange.hpp>
+
 #include <sndfile.h>
+
+using boost::irange;
+
+void reverb(std::vector<float> &in, std::vector<float> &out) {
+    auto len = std::min(in.size(), out.size());
+
+    std::vector<float> delayline(8192);
+    size_t delay_pos = 0;
+    float feedback = 0.95;
+    float dry = 0.2;
+    float wet = 0.8;
+    
+    for (auto i : irange(0u, len)) {
+	float d = in[i];
+	    
+	d += delayline[delay_pos] * feedback * 0.25;
+	d -= delayline[(delay_pos + 673) % delayline.size()] * feedback * 0.25;
+	d += delayline[(delay_pos + 2937) % delayline.size()] * feedback * 0.25;
+	d -= delayline[(delay_pos + 3717) % delayline.size()] * feedback * 0.25;
+	
+	delayline[delay_pos] = -d;
+
+	out[i] = in[i] * dry + d * wet;
+
+	++delay_pos;
+	delay_pos %= delayline.size();
+    }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -10,57 +41,30 @@ int main(int argc, char *argv[]) {
 	return 1;
     }
 
-    std::vector<float> outbuf(44100 * 60);
+    static const int seconds = 60;
+    static const int rate = 44100;
+    static const int channels = 2;
+
+    std::vector<float> base(rate * seconds);
+    std::vector<float> outbuf(rate * seconds);
+
+    for (auto i : irange(0u, 10000u)) {
+	base[i] = ((i % 256) / 256.0f - 0.5f) * 0.3;
+    }
+
+    for (auto i : irange(15000u, 25000u)) {
+	base[i] = ((i % 128) / 128.0f - 0.5f) * 0.3;
+    }
+    
+    reverb(base, outbuf);
 
     SF_INFO info;
-    info.samplerate = 44100;
+    info.samplerate = rate;
     info.channels = 1;
     info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
 
-    for (int a = 0; a < 10; ++a) {
-
-	if (a % 2 == 0) {
-	    // naive saw
-	    float val = 0;
-
-	    for (int i = 0; i < 44100; ++i) {
-		val += 0.02;
-		if (val > 0.5) {
-		    val -= 1.0;
-		}
-
-		outbuf[a * 44100 + i] = val * 0.1;
-	    }
-	} else {
-	    // integrating saw
-	    float val = 0;
-
-	    float prev0 = 0;
-	    float prev1 = 0;
-
-	    for (int i = 0; i < 44100; ++i) {
-		val += 0.02;
-		if (val > 1.0) { // TODO: need to adjust C after 0.5 -> 1.0 change
-		    val -= 2.0;
-		}
-
-		float d0 = val * val * val - val / 4;
-		float out0 = d0 - prev0;
-		prev0 = d0;
-
-		float out1 = out0 - prev1;
-		prev1 = out0;
-
-		std::cout << val << " " << out1 << std::endl;
-
-		// TODO: do the math for vol corr
- 		outbuf[a * 44100 + i] = out1 * out1 * 150;
-	    }
-	}
-    }
-
     SNDFILE *outfile = sf_open(argv[1], SFM_WRITE, &info);
-    sf_writef_float(outfile, outbuf.data(), 44100 * 60);
+    sf_writef_float(outfile, outbuf.data(), rate * seconds);
     sf_close(outfile);
 
     return 0;
