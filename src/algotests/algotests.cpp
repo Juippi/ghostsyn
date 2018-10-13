@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <string>
 #include <boost/range/irange.hpp>
 
 #include <sndfile.h>
@@ -11,26 +13,45 @@ using boost::irange;
 void reverb(std::vector<float> &in, std::vector<float> &out) {
     auto len = std::min(in.size(), out.size());
 
-    std::vector<float> delayline(8192);
+    std::vector<float> delayline(32768);
+    const int num_taps = 16;
     size_t delay_pos = 0;
-    float feedback = 0.95;
-    float dry = 0.2;
-    float wet = 0.8;
+    float feedback = 0.96f / num_taps;
+    float dry = 0.1f;
+    float wet = 0.9f;
+    float y1 = 0.0f;
+    bool first = true;
     
     for (auto i : irange(0u, len)) {
 	float d = in[i];
-	    
-	d += delayline[delay_pos] * feedback * 0.25;
-	d -= delayline[(delay_pos + 673) % delayline.size()] * feedback * 0.25;
-	d += delayline[(delay_pos + 2937) % delayline.size()] * feedback * 0.25;
-	d -= delayline[(delay_pos + 3717) % delayline.size()] * feedback * 0.25;
+	float phase = 1.0f;
+	int dtime = 0;
 	
-	delayline[delay_pos] = -d;
+	for (auto i : irange(0, num_taps)) {
+	    int magic = 19783;
+	    dtime *= magic;
+	    dtime += magic;
+	    dtime %= delayline.size();
+	    if (first) {
+		std::cerr << dtime << std::endl;
+	    }
+	    d += delayline[(delay_pos + dtime) % delayline.size()] * feedback * phase;
+	    phase *= -1.0;
+	}
 
-	out[i] = in[i] * dry + d * wet;
+	// lp filt
+	float din = y1 * 0.90f + d * 0.10f;
+	y1 = din;
+
+	delayline[delay_pos] = din;
+
+	//out[i] = in[i] * dry + d * wet;
+	out[i] = d;
 
 	++delay_pos;
 	delay_pos %= delayline.size();
+
+	first = false;
     }
 }
 
@@ -49,11 +70,11 @@ int main(int argc, char *argv[]) {
     std::vector<float> outbuf(rate * seconds);
 
     for (auto i : irange(0u, 10000u)) {
-	base[i] = ((i % 256) / 256.0f - 0.5f) * 0.3;
+	base[i] = ((i % 256) / 256.0f - 0.5f) * 0.8;
     }
 
     for (auto i : irange(15000u, 25000u)) {
-	base[i] = ((i % 128) / 128.0f - 0.5f) * 0.3;
+	base[i] = ((i % 128) / 128.0f - 0.5f) * 0.8;
     }
     
     reverb(base, outbuf);
