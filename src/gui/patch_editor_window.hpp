@@ -65,7 +65,7 @@ class PatchEditorWindow : public EditorWindow {
 	{Module::TYPE_FILTER, "flt"},
 	{Module::TYPE_ENV, "env"},
 	{Module::TYPE_COMP, "cmp"},
-	{Module::TYPE_DELAY, "dly"},
+	{Module::TYPE_REVERB, "rev"},
 	{Module::TYPE_CHORUS, "cho"}
     };
 
@@ -75,7 +75,7 @@ class PatchEditorWindow : public EditorWindow {
 	{Module::TYPE_FILTER, {"in  ", "coff", "fdbk", "   "}},
 	{Module::TYPE_ENV, {"att ", "swtc", "dcay", "stg "}},
 	{Module::TYPE_COMP, {"in  ", "thre", "att ", "rel "}},
-	{Module::TYPE_DELAY, {"in  ", "len ", "fdbk", "   "}},
+	{Module::TYPE_REVERB, {"in  ", "taps", "fdbk", "lp  "}},
 	{Module::TYPE_CHORUS, {"in", "time", "madd", "mamp"}}
     };
 

@@ -7,7 +7,7 @@ const std::map<Module::ModuleType, std::string> Module::type_names = {
     {TYPE_FILTER, "filter"},
     {TYPE_ENV, "envelope"},
     {TYPE_COMP, "compressor"},
-    {TYPE_DELAY, "delay"},
+    {TYPE_REVERB, "reverb"},
     {TYPE_CHORUS, "chorus"}
 };
 
@@ -16,7 +16,7 @@ const std::map<std::string, Module::ModuleType> Module::name_types = {
 	{"filter", TYPE_FILTER},
 	{"envelope", TYPE_ENV},
 	{"compressor", TYPE_COMP},
-	{"delay", TYPE_DELAY},
+	{"reverb", TYPE_REVERB},
 	{"chorus", TYPE_CHORUS}
 };
 
@@ -40,8 +40,8 @@ std::string Module::type2str(int _type) {
 	return "TYPE_ENV";
     case TYPE_COMP:
 	return "TYPE_COMP";
-    case TYPE_DELAY:
-	return "TYPE_DELAY";
+    case TYPE_REVERB:
+	return "TYPE_REVERB";
     case TYPE_CHORUS:
 	return "TYPE_CHORUS";
     default:
@@ -123,10 +123,11 @@ Module::Module(ModuleType type_)
 	params.push_back(Param("attack", 0.99f));
 	params.push_back(Param("release", 0.001f));
 	break;
-    case TYPE_DELAY:
+    case TYPE_REVERB:
 	params.push_back(Param("input", 0.0f));
-	params.push_back(Param("time", 10000));
-	params.push_back(Param("feedback", 0.1f));
+	params.push_back(Param("taps", 1));
+	params.push_back(Param("feedback", 0.5f));
+	params.push_back(Param("lp", 0.5f));
 	break;
     case TYPE_CHORUS:
 	params.push_back(Param("input", 0.0f));
@@ -173,10 +174,11 @@ void Module::from_json(Json::Value &json, int my_index) {
 	params.push_back(Param("attack", params_json["attack"].asFloat()));
 	params.push_back(Param("release", params_json["release"].asFloat()));
 	break;
-    case TYPE_DELAY:
+    case TYPE_REVERB:
 	params.push_back(Param("input", 0.0f));
-	params.push_back(Param("time", params_json["time"].asInt()));
+	params.push_back(Param("taps", params_json["taps"].asInt()));
 	params.push_back(Param("feedback", params_json["feedback"].asFloat()));
+	params.push_back(Param("lp", params_json["lp"].asFloat()));
 	break;
     case TYPE_CHORUS:
 	params.push_back(Param("input", 0.0f));

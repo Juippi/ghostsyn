@@ -10,7 +10,7 @@ class Module {
 private:
     static std::string type2str(int type);
 public:
-    typedef enum {TYPE_OSC, TYPE_FILTER, TYPE_ENV, TYPE_COMP, TYPE_DELAY, TYPE_CHORUS} ModuleType;
+    typedef enum {TYPE_OSC, TYPE_FILTER, TYPE_ENV, TYPE_COMP, TYPE_REVERB, TYPE_CHORUS} ModuleType;
 
     Module();
     Module(Json::Value &json, int my_index);
@@ -102,7 +102,7 @@ public:
 	1 - filter
 	2 - envelope
 	3 - dyn. compressor
-	4 - delay
+	4 - reverb
 
 	flag byte:
 	0 - mono

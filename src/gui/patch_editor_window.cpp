@@ -97,10 +97,19 @@ void PatchEditorWindow::update_params_from_ui() {
     for (size_t i : irange(0u, modules.size())) {
 	auto &e = modules[i];
 	for (size_t k : irange(0u, std::min(e.string_values.size(), e.module.params.size()))) {
+	    std::cerr << "set: module " << i << " param " << k;
 	    const auto &str_val = e.string_values[k];
-	    float float_val = strtof(str_val.c_str(), NULL);
-	    e.module.params[k].float_value = float_val;
-	    std::cerr << "set: module " << i << " param " << k << " value " << float_val << std::endl;
+	    if (e.module.params[i].type == Module::Param::TYPE_INT32) {
+		int int_val = atoi_pos<int>(str_val);
+		if (int_val >= 0) {
+		    e.module.params[k].float_value = int_val;
+		}
+		std::cerr << " value " << int_val << std::endl;
+	    } else {
+		float float_val = strtof(str_val.c_str(), NULL);
+		e.module.params[k].float_value = float_val;
+		std::cerr << " value " << float_val << std::endl;
+	    }
 	}
     }
 }
@@ -160,6 +169,9 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
     action_buttons.push_back(Button("New cho",
 				    std::bind(&PatchEditorWindow::new_module, this, Module::TYPE_CHORUS),
 				    10 + 162 + 8, 10 + Button::default_height + 8, 162));
+    action_buttons.push_back(Button("New rev",
+				    std::bind(&PatchEditorWindow::new_module, this, Module::TYPE_REVERB),
+				    10 + 162 + 8, 10 + (Button::default_height + 8) * 2, 162));
     action_buttons.push_back(Button("Del module",
 				    std::bind(&PatchEditorWindow::del_module, this),
 				    10 + (162 + 8) * 2, 10, 162));
@@ -528,8 +540,12 @@ void PatchEditorWindow::new_module(Module::ModuleType type) {
     m.module = Module(type);
     m.page = shown_page;
     m.string_values.resize(m.module.params.size());
-    for (auto &v : m.string_values) {
-	v = "0.0";
+    for (auto i : irange(0u, m.module.params.size())) {
+	if (m.module.params[i].type == Module::Param::TYPE_INT32) {
+	    m.string_values[i] = "0";
+	} else {
+	    m.string_values[i] = "0.0";
+	}
     }
     m.adjust_size();
     modules.push_back(m);

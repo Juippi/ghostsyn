@@ -15,7 +15,7 @@
 %define ENABLE_ENVELOPE
 %define ENABLE_COMPRESSOR
 %define ENABLE_CHORUS
-%define ENABLE_DELAY
+%define ENABLE_REVERB
 %define ENABLE_SILENCE	
 
 song_ticklen:

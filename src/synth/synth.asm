@@ -27,7 +27,7 @@ oct_semitones:
 
 	%define	MODULE_DATA_SIZE 6
 	%define MODULE_DATA_BYTES MODULE_DATA_SIZE * 4
-	%define MODULE_WORK_BYTES 65536
+	%define MODULE_WORK_BYTES 65536 * 4
 
 	%define NUM_TRACKS 8
 	%define NUM_ROWS 48
@@ -58,7 +58,7 @@ oct_semitones:
 	%define MODULE_TYPE_FILTER     0x01
 	%define MODULE_TYPE_ENV        0x02
 	%define MODULE_TYPE_COMPRESSOR 0x03
-	%define MODULE_TYPE_DELAY      0x04
+	%define MODULE_TYPE_REVERB      0x04
 	%define MODULE_TYPE_CHORUS      0x05
 	;; special type used for masking unused elements in non-compact builds
 	%define MODULE_TYPE_SILENCE       0x0f
@@ -139,9 +139,9 @@ section .text
 %include "module_compressor.asm"
 %endif ;; ENABLE_COMPRESSOR
 
-%ifdef ENABLE_DELAY
-%include "module_delay.asm"
-%endif ;; ENABLE_DELAY
+%ifdef ENABLE_REVERB
+%include "module_reverb.asm"
+%endif ;; ENABLE_REVERB
 
 %ifdef ENABLE_CHORUS
 %include "module_chorus.asm"
@@ -524,11 +524,11 @@ no_envelope:
 no_compressor:
 %endif
 
-%ifdef ENABLE_DELAY
-	cmp al, MODULE_TYPE_DELAY
-	jne no_delay
-	call module_delay
-no_delay:
+%ifdef ENABLE_REVERB
+	cmp al, MODULE_TYPE_REVERB
+	jne no_reverb
+	call module_reverb
+no_reverb:
 	%endif
 
 %ifdef ENABLE_CHORUS
