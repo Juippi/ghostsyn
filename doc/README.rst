@@ -255,6 +255,14 @@ The envelope is a simple AD envelope with linear attack and exponential decay.
 Triggering envelope sets it to attack stage, where its output increases until
 set threshold, where it switches to decay.
 
+Reverb
+^^^^^^
+
+Stereo delay/reverb consisting of delay lines with variable number of
+pseudorandomly placed taps and LP filters. For stability,
+<number of taps> * <feedback> shouldn't exceed 1 by too much. LP filter
+coefficient should be in [0.0, 1.0] with higher values meaning lower cutoff.
+
 TODO
 ----
 
