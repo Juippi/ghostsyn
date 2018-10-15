@@ -34,7 +34,7 @@ public:
     static const std::map<std::string, ModuleType> name_types;
     // my index in module array, used for calculating module output byte offsets
     int my_index = 0;
-    bool stereo = true; // stereo flag, only affects oscillator
+    bool stereo = true; // stereo flag
     int out_module = -1; // output module idx, 0 means master out
     int out_param = -1;   // output goes to this param (word) in dest. module
     std::string comment;

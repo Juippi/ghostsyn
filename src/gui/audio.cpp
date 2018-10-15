@@ -97,6 +97,7 @@ void Audio::update_synth(int order_offset) {
 	}
     }
 
+    // playing song from the middle is accomplished by rotating the order
     if (order_offset > 0 && order_offset < static_cast<int>(section_order.size())) {
 	std::rotate(section_order.begin(), section_order.begin() + order_offset, section_order.end());
     }
