@@ -27,7 +27,6 @@ module_reverb:
 	mov [ebp + REV_STATE_DELAY_POS], ebx
 
 	;; sample delayline at multiple positions
-
 	mov ecx, [esi + REV_VAL_TAPS] ; number of delay taps
 	fldz			      ; delay line output accumulator
 
@@ -43,9 +42,22 @@ delay_tap_loop:
 	fadd dword [ebp + ebx + REV_STATE_BUF] ; sample delay line
 	pop ebx
 
+	;; stereo effect: bss_stereo_factor is a float, but works just
+	;; as well here for spreading tap locations depending on channel
+	add eax, [bss_stereo_factor]
+
 	loop delay_tap_loop
 
-	;; TODO: lp filter for delay line input
+	;; LP filter for delay line input
+	fld1
+	fsub dword [esi + REV_VAL_LP]
+	fmulp			; x * (1 - lp_coeff)
+	
+	fld dword [ebp + REV_STATE_FLT]
+	fmul dword [esi + REV_VAL_LP] ; y^-1 * lp_coeff
+	faddp
+
+	fst dword [ebp + REV_STATE_FLT] ; store output for lp filter
 
 	fmul dword [esi + REV_VAL_FEEDBACK]
 	faddp
