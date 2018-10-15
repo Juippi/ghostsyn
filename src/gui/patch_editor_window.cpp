@@ -94,21 +94,21 @@ bool PatchEditorWindow::has_connection_cycle() {
 }
 
 void PatchEditorWindow::update_params_from_ui() {
-    for (size_t i : irange(0u, modules.size())) {
-	auto &e = modules[i];
-	for (size_t k : irange(0u, std::min(e.string_values.size(), e.module.params.size()))) {
-	    std::cerr << "set: module " << i << " param " << k;
-	    const auto &str_val = e.string_values[k];
-	    if (e.module.params[i].type == Module::Param::TYPE_INT32) {
+    for (size_t mod_idx : irange(0u, modules.size())) {
+	auto &e = modules[mod_idx];
+	for (size_t param_idx : irange(0u, std::min(e.string_values.size(), e.module.params.size()))) {
+	    std::cerr << "set: module " << mod_idx << " param " << param_idx;
+	    const auto &str_val = e.string_values[param_idx];
+	    if (e.module.params[param_idx].type == Module::Param::TYPE_INT32) {
 		int int_val = atoi_pos<int>(str_val);
 		if (int_val >= 0) {
-		    e.module.params[k].float_value = int_val;
+		    e.module.params[param_idx].int_value = int_val;
 		}
-		std::cerr << " value " << int_val << std::endl;
+		std::cerr << " value (int) " << int_val << std::endl;
 	    } else {
 		float float_val = strtof(str_val.c_str(), NULL);
-		e.module.params[k].float_value = float_val;
-		std::cerr << " value " << float_val << std::endl;
+		e.module.params[param_idx].float_value = float_val;
+		std::cerr << " value (float) " << float_val << std::endl;
 	    }
 	}
     }
