@@ -40,6 +40,7 @@ delay_tap_loop:
 	add ebx, eax
 	and ebx, DELAY_LEN_MASK
 	fadd dword [ebp + ebx + REV_STATE_BUF] ; sample delay line
+	fneg				       ; reverse phase
 	pop ebx
 
 	;; stereo effect: bss_stereo_factor is a float, but works just
