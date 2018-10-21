@@ -12,12 +12,15 @@ protected:
     std::mutex mutex;
 public:
     TrackerData();
-    TrackerData(unsigned int num_rows, unsigned int num_tracks);
+    TrackerData(unsigned int num_rows, unsigned int num_tracks,
+		unsigned int pattern_rows);
     TrackerData(Json::Value &json);
 
     unsigned int ticklen = 20000; // len of tracker tick in samples
-    unsigned int num_rows = 0;
-    unsigned int num_tracks = 0;
+    unsigned int num_rows = 32;
+    unsigned int num_tracks = 8;
+
+    static const int max_num_rows = 128;
 
     class Trigger {
     public:
@@ -38,8 +41,6 @@ public:
     // some modules for speedk
     std::vector<uint8_t> module_skip_flags;
 
-    unsigned int frames_per_row; // in audio frames
-
     void from_json(Json::Value &json);
     Json::Value as_json();
 
@@ -58,11 +59,11 @@ public:
     bool del_pattern(size_t idx);
 
     Pattern get_pattern(size_t pattern);
-    void set_pattern(size_t pattern, const Pattern &new_pattern);
+    void set_pattern(size_t pattern, Pattern new_pattern);
     void clear_pattern(size_t pattern);
 
     Pattern::Track get_track(size_t pattern, size_t track_no);
-    void set_track(size_t pattern, size_t track_no, const Pattern::Track &track);
+    void set_track(size_t pattern, size_t track_no, Pattern::Track track);
     void clear_track(size_t pattern, size_t track_no);
 
     void lock();

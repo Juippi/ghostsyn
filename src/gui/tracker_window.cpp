@@ -24,10 +24,17 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
 		    6,
 		    tostr(data.ticklen),
 		    std::bind(&TrackerWindow::set_tempo_cb, this,
-			      std::placeholders::_1)) {
+			      std::placeholders::_1)),
+      pattern_rows_textbox(UI::Text::char_width * 4 * 9,
+			   UI::Text::font_size * 2 * 7,
+			   6,
+			   tostr(data.num_rows),
+			   std::bind(&TrackerWindow::set_pattern_rows_cb, this,
+				     std::placeholders::_1)) {
     register_(order_shrink);
     register_(order_grow);
     register_(tempo_textbox);
+    register_(pattern_rows_textbox);
 }
 
 void TrackerWindow::key_down(const SDL_Keysym &sym) {
@@ -328,7 +335,7 @@ void TrackerWindow::update() {
     auto &patt = data.patterns[current_pattern];
     for (int disp_row = 0; disp_row < UI::Tracker::visible_rows; ++disp_row) {
 	int row_idx = cursor_row - (UI::Tracker::visible_rows / 2) + disp_row;
-	if (row_idx < 0 || static_cast<size_t>(row_idx) >= patt.num_rows) {
+	if (row_idx < 0 || static_cast<size_t>(row_idx) >= data.num_rows) {
 	    continue;
 	}
 
@@ -511,12 +518,12 @@ void TrackerWindow::cursor_move(int x, int y) {
     if (x < 0) {
 	cursor_x = std::max(0, cursor_x + x);
     } else {
-	cursor_x = std::min(static_cast<int>(cp.num_tracks * 4) - 1, cursor_x + x);
+	cursor_x = std::min(static_cast<int>(data.num_tracks * 4) - 1, cursor_x + x);
     }
     if (y < 0) {
 	cursor_row = std::max(0, cursor_row + y);
     } else {
-	cursor_row = std::min(static_cast<int>(cp.num_rows) - 1, cursor_row + y);
+	cursor_row = std::min(static_cast<int>(data.num_rows) - 1, cursor_row + y);
     }
 }
 
@@ -763,6 +770,16 @@ void TrackerWindow::set_tempo_cb(const std::string &value) {
 	data.ticklen = 20000; // just some default here
     }
     data.unlock();
+}
+
+void TrackerWindow::set_pattern_rows_cb(const std::string &value) {
+    int val = atoi_pos<int>(value);
+    data.lock();
+    if (val > 0 && val <= data.max_num_rows) {
+	data.num_rows = val;
+    }
+    data.unlock();
+    cursor_move(0, 0);
 }
 
 size_t TrackerWindow::get_current_pattern() {

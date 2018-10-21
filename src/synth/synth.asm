@@ -30,7 +30,8 @@ oct_semitones:
 	%define MODULE_WORK_BYTES 65536 * 4
 
 	%define NUM_TRACKS 8
-	%define NUM_ROWS 48
+
+	%define MAX_NUM_ROWS 128 ; reserve space for max. this many rows per pattern
 
 %ifdef TRACKER_EMBED
 	%define TRACKER_MAX_MODULES 20
@@ -300,7 +301,13 @@ tracks_loop:
 	;; get pattern start
 	mov ebx, [bss_order_pos]
 	mov bl, [ebx + order]
+%ifdef TRACKER_EMBED
+	mov eax, [num_rows]
+	imul eax, NUM_TRACKS
+	imul ebx, eax
+%else
 	imul ebx, NUM_TRACKS * NUM_ROWS
+%endif
 	;; add pattern offset
 	mov eax, [bss_pattern_pos]
 	add ebx, eax
@@ -454,7 +461,15 @@ notrig:				; no trigger note
 
 	mov eax, [bss_pattern_pos]
 	inc eax
+%ifdef TRACKER_EMBED
+	push ebx
+	mov ebx, [num_rows]
+	imul ebx, NUM_TRACKS
+	cmp eax, ebx
+	pop ebx
+%else
 	cmp eax, NUM_TRACKS * NUM_ROWS
+%endif
 	jne no_advance
 	;; advance order
 	mov eax, [bss_order_pos]
@@ -673,9 +688,13 @@ synth_update:
 	mov esi, [eax + 40]
 	mov [song_ticklen], esi
 
-	;; per-channel module skip flags
+	;; number of rows in pattern
 	mov esi, [eax + 44]
-	mov ecx, [eax + 48]
+	mov [num_rows], esi
+
+	;; per-channel module skip flags
+	mov esi, [eax + 48]
+	mov ecx, [eax + 52]
 	mov edi, module_skip_flags
 	rep movsb
 

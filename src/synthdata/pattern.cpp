@@ -24,7 +24,7 @@ Json::Value Pattern::Cell::as_json() {
 
 
 Pattern::Track::Track(unsigned int num_rows) {
-    cells.resize(num_rows);
+    resize(num_rows);
 }
 
 Pattern::Track::Track(const Json::Value &json) {
@@ -45,6 +45,10 @@ Json::Value Pattern::Track::as_json() {
 	json.append(cell.as_json());
     }
     return json;
+}
+
+void Pattern::Track::resize(unsigned int num_rows) {
+    cells.resize(num_rows);
 }
 
 Pattern::Pattern(unsigned int num_tracks_, unsigned int num_rows_)
@@ -91,10 +95,10 @@ Json::Value Pattern::as_json() {
     return pattern_json;
 }
 
-std::vector<uint8_t> Pattern::bin() {
+std::vector<uint8_t> Pattern::bin(unsigned int output_num_rows) {
     std::vector<uint8_t> bin;
 
-    for (size_t r = 0; r < num_rows; ++r) {
+    for (size_t r = 0; r < std::min(num_rows, output_num_rows); ++r) {
 	for (size_t t = 0; t < num_tracks; ++t) {
 	    auto &cell = tracks[t].cells[r];
 	    uint8_t val = 0;
@@ -108,6 +112,13 @@ std::vector<uint8_t> Pattern::bin() {
 	}
     }
 
-    bin.resize(num_rows * num_tracks);
+    bin.resize(output_num_rows * num_tracks);
     return bin;
+}
+
+void Pattern::resize(unsigned int num_rows_) {
+    num_rows = num_rows_;
+    for (auto &t : tracks) {
+	t.resize(num_rows);
+    }
 }

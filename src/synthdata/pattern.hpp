@@ -32,6 +32,7 @@ public:
 	Track(unsigned int num_rows = 0);
 	Track(const Json::Value &json);
 	void clear();
+	void resize(unsigned int num_rows);
 	Json::Value as_json();
 	std::vector<Cell> cells;
     };
@@ -40,5 +41,7 @@ public:
 
     void from_json(const Json::Value &json);
     Json::Value as_json();
-    std::vector<uint8_t> bin();
+    // Convert num_rows rows of pattern data to binary representation
+    std::vector<uint8_t> bin(unsigned int num_rows);
+    void resize(unsigned int num_rows);
 };

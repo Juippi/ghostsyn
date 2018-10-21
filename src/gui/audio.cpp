@@ -123,6 +123,7 @@ void Audio::update_synth(int order_offset) {
 		     section_modules.data(), section_modules.size(),
 		     section_triggers.data(), section_triggers.size(),
 		     module_count, ticklen,
+		     data.num_rows,
 		     data.module_skip_flags.data(), data.module_skip_flags.size());
     } else {
 	std::cerr << "some data section(s) empty, can't configure synth!" << std::endl;

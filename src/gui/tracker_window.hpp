@@ -35,6 +35,7 @@ protected:
     int order_cursor_pos = 0;
 
     TextBox tempo_textbox;
+    TextBox pattern_rows_textbox;
 
     struct _colors {
 	const Color rownum = {160, 160, 160, 255};
@@ -76,6 +77,7 @@ protected:
     int order_y(int order_idx);
 
     void set_tempo_cb(const std::string &value);
+    void set_pattern_rows_cb(const std::string &value);
 
 public:
     TrackerWindow(int x, int y, int width, int height, SDL_Renderer *renderer,

@@ -16,9 +16,14 @@
 %define ENABLE_COMPRESSOR
 %define ENABLE_CHORUS
 %define ENABLE_REVERB
-%define ENABLE_SILENCE	
+%define ENABLE_SILENCE
 
+;;; length of single tracker tick in audio frames
 song_ticklen:
+	dd 0
+
+;;; length of pattern (number of rows)
+num_rows:
 	dd 0
 
 elements:
@@ -28,7 +33,7 @@ order:
 	times TRACKER_MAX_ORDER db 0
 
 patterns:
-	times (NUM_TRACKS * NUM_ROWS * TRACKER_MAX_PATTERNS) db 0
+	times (NUM_TRACKS * MAX_NUM_ROWS * TRACKER_MAX_PATTERNS) db 0
 
 trigger_points:
 	;; each track can trigger two instruments.
