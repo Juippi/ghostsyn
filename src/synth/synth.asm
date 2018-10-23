@@ -20,8 +20,12 @@ end_fade:
 master_hp_state:
 	dd 0.0
 	dd 0.0
-master_hp_coeff:
-	dd 0.5
+master_hp_c1:
+	dd 0.2
+master_hp_c2:
+	dd 0.8
+master_hp_mix:
+	dd 2.5
 
 ;;; other constants
 stereo_mod:
@@ -650,12 +654,15 @@ was_master_out:
 
 	fld st0
 	fld st0
-	fadd dword [edx]
-	fmul dword [master_hp_coeff]
+
+	fmul dword [master_hp_c1]
+	fld dword [edx]
+	fmul dword [master_hp_c2]
+	faddp
+
 	fst dword [edx]
 	fsubp
-	fdiv dword [master_hp_coeff] ; * 2
-	fdiv dword [master_hp_coeff] ; * 2
+	fmul dword [master_hp_mix]
 	faddp
 
 	pop edx
