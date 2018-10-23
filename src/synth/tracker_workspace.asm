@@ -4,11 +4,6 @@
 %define TRACKER_MAX_ORDER 64
 %define TRACKER_MAX_PATTERNS 64
 
-;;; in tracker build, this is the max. number of modules we reserve
-;;; space for, and tracker_mod_count stores the number of modules
-;;; we actually run
-%define NUM_MODULES 32
-
 ;;; tracker build has all module types always enabled
 %define ENABLE_OSCILLATOR
 %define ENABLE_FILTER
@@ -17,6 +12,8 @@
 %define ENABLE_CHORUS
 %define ENABLE_REVERB
 %define ENABLE_SILENCE
+
+%define NUM_MODULES TRACKER_MAX_MODULES
 
 ;;; length of single tracker tick in audio frames
 song_ticklen:
@@ -47,4 +44,4 @@ trigger_points:
 	times (NUM_TRACKS * 2 * 4) dd 0
 
 module_skip_flags:
-	times (NUM_TRACKS * NUM_MODULES) db 0
+	times (NUM_TRACKS * TRACKER_MAX_MODULES) db 0

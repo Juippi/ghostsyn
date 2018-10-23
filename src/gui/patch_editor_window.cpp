@@ -653,7 +653,7 @@ void PatchEditorWindow::convert_instruments(TrackerData &data) {
     std::reverse(dump_order.begin(), dump_order.end());
     std::reverse(dump_modules.begin(), dump_modules.end());
 
-    const int max_num_modules = 32; // fixme: must match synth NUM_MODULES constant
+    const int max_num_modules = 64; // fixme: must match synth NUM_MODULES constant
     data.module_skip_flags.clear();
     data.module_skip_flags.resize(data.num_tracks * max_num_modules);
     for (auto &v : data.module_skip_flags) {
