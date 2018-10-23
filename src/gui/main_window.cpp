@@ -23,7 +23,7 @@ void MainWindow::save_song() {
     // Essential definitions for compile
     def_str << "%define NUM_MODULES " << data.modules.size() << std::endl;
     def_str << "%define SONG_TICKLEN " << data.ticklen << std::endl;
-    def_str << "%define NUM_ROWS" << data.num_rows << std::endl;
+    def_str << "%define NUM_ROWS " << data.num_rows << std::endl;
 
     def_str << "%define ENABLE_SILENCE" << std::endl;
     for (auto &nt : Module::name_types) {
