@@ -310,9 +310,8 @@ tracks_loop:
 	mov ebx, [bss_order_pos]
 	mov bl, [ebx + order]
 %ifdef TRACKER_EMBED
-	mov eax, [num_rows]
-	imul eax, NUM_TRACKS
-	imul ebx, eax
+	imul ebx, [num_rows]
+	imul ebx, NUM_TRACKS
 %else
 	imul ebx, NUM_TRACKS * NUM_ROWS
 %endif
