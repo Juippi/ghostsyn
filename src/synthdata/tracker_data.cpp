@@ -191,7 +191,7 @@ std::vector<Section *> TrackerData::bin() {
     res.push_back(sect_triggers);
 
     BinSection *skip_flags = new BinSection("module_skip_flags", "module_skip_flags");
-    const int max_num_modules = 32; // TODO: to a common header
+    const int max_num_modules = 64; // TODO: to a common header
     for (int tidx : irange(0u, num_tracks)) {
 	for (int eidx : irange(0u, modules.size())) {
 	    char val = module_skip_flags[tidx * max_num_modules + eidx];
