@@ -16,6 +16,13 @@ global_volume:
 end_fade:
 	dd 0.99998
 
+;;; state for master high boost filter
+master_hp_state:
+	dd 0.0
+	dd 0.0
+master_hp_coeff:
+	dd 0.5
+
 ;;; other constants
 stereo_mod:
 	dd 1.003	; adjustment for 2nd ch. TODO: could be osc param?
@@ -633,7 +640,29 @@ was_master_out:
 %endif
 
 	fmul dword [global_volume]
-	fstp dword [edi]
+
+	;; high freq boost
+	push edx
+
+	mov edx, edi
+	and edx, 0x04
+	add edx, master_hp_state
+
+	fld st0
+	fld st0
+	fadd dword [edx]
+	fmul dword [master_hp_coeff]
+	fst dword [edx]
+	fsubp
+	fdiv dword [master_hp_coeff] ; * 2
+	fdiv dword [master_hp_coeff] ; * 2
+	faddp
+
+	pop edx
+
+	;; end high freq boost
+
+	fstp dword [edi]	; store synth output
 	add edi, 4
 
 	pop ecx
