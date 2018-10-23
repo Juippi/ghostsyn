@@ -69,7 +69,7 @@ oct_semitones:
 	%define MODULE_TYPE_COMPRESSOR 0x03
 	%define MODULE_TYPE_REVERB      0x04
 	%define MODULE_TYPE_CHORUS      0x05
-	;; special type used for masking unused elements in non-compact builds
+	;; special type used for masking unused modules in non-compact builds
 	%define MODULE_TYPE_SILENCE       0x0f
 
 	;; output ops (byte 1 of module type word)
@@ -115,7 +115,7 @@ bss_master_out:
 bss_temp1:
 	resd 1
 
-	;; copy of all elements per track, + work area per channel
+	;; copy of all modules per track, + work area per channel
 	%define STATE_BYTES_PER_CHANNEL MODULE_WORK_BYTES * 2
 
 ;;;
@@ -194,7 +194,7 @@ synth:
 ;;;
 ;;; Synth initial setup
 ;;;
-;;; create copies of elements for each track
+;;; create copies of modules for each track
 
 	pusha
 %ifdef TRACKER_EMBED
@@ -214,12 +214,12 @@ setup_loop:
 %if 0
 ;;; compact version, no module masking
 	;; make one copy of the element set for each track (
-	lea esi, [elements]
+	lea esi, [modules]
 	mov ecx, MODULE_DATA_BYTES * NUM_MODULES
 	rep movsb
 %else
 ;;; per-module copy version with module masking for != 4k builds
-	lea esi, [elements]
+	lea esi, [modules]
 	mov ecx, NUM_MODULES
 _module_loop:
 	push ecx
@@ -409,7 +409,7 @@ no_noteoff:
 
 %else	      ; complex triggering
 	;;
-	;; flexible triggering: trigger up to 4 osc/env elements
+	;; flexible triggering: trigger up to 4 osc/env modules
 	;;
 	pusha
 
@@ -490,13 +490,13 @@ no_advance:
 notick:				; no tick starting
 
 
-	;; process all elements
+	;; process all modules
 	mov ecx, NUM_MODULES
 
 element_loop:
 	push ecx
 
-	;;; call elements according to types
+	;;; call modules according to types
 	mov eax, dword [esi] ; load element type
 
 	push ebp		; save ebp, in case incremented because of stereo
@@ -705,7 +705,7 @@ synth_update:
 
 	mov esi, [eax + 20]     ; instruments
 	mov ecx, [eax + 24]
-	mov edi, elements
+	mov edi, modules
 	rep movsb
 
 	mov esi, [eax + 28]	; triggers

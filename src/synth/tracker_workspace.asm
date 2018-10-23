@@ -1,4 +1,4 @@
-;;; Max. number of modules, elements & patterns when running with
+;;; Max. number of modules, modules & patterns when running with
 ;;; tracker, should be enough for any reasonable 4k tune.
 %define TRACKER_MAX_MODULES 64
 %define TRACKER_MAX_ORDER 64
@@ -23,7 +23,7 @@ song_ticklen:
 num_rows:
 	dd 0
 
-elements:
+modules:
 	times (MODULE_DATA_BYTES * TRACKER_MAX_MODULES) dd 0
 
 order:
