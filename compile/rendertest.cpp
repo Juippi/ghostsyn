@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     std::vector<float> outbuf(song_frames);
 
     synth(outbuf.data(), song_frames);
-    mastering(outbuf.data(), song_frames);
+    //mastering(outbuf.data(), song_frames);
 
     SF_INFO info;
     info.samplerate = 44100;
