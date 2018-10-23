@@ -45,9 +45,6 @@ oct_semitones:
 	%define MAX_NUM_ROWS 128 ; reserve space for max. this many rows per pattern
 
 %ifdef TRACKER_EMBED
-	%define TRACKER_MAX_MODULES 20
-	%define TRACKER_MAX_ORDER 20
-	%define TRACKER_MAX_PATTERNS 20
 	;; include empty data for tracker use
 	%include "tracker_workspace.asm"
 %else
