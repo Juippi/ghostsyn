@@ -32,13 +32,13 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
 			   std::bind(&TrackerWindow::set_pattern_rows_cb, this,
 				     std::placeholders::_1)),
       master_hb_coeff_textbox(UI::Text::char_width * 4 * 9,
-			      UI::Text::font_size * 2 * 8,
+			      UI::Text::font_size * 2 * 9,
 			      6,
 			      tostr(data.master_hb_coeff),
 			      std::bind(&TrackerWindow::set_master_hb_coeff_cb, this,
 					std::placeholders::_1)),
       master_hb_mix_textbox(UI::Text::char_width * 4 * 9,
-			    UI::Text::font_size * 2 * 9,
+			    UI::Text::font_size * 2 * 10,
 			    6,
 			    tostr(data.master_hb_coeff),
 			    std::bind(&TrackerWindow::set_master_hb_mix_cb, this,
@@ -506,16 +506,28 @@ void TrackerWindow::update() {
     }
 
     std::stringstream oct_text;
-    oct_text << "Octave : " << current_octave;
+    oct_text << "Octave   " << current_octave;
     draw_text(0, (UI::Text::font_size * 2) * 4, oct_text.str());
 
     std::stringstream instr_text;
-    instr_text << "Instr  : " << current_instrument;
+    instr_text << "Instr    " << current_instrument;
     draw_text(0, (UI::Text::font_size * 2) * 5, instr_text.str());
 
     std::stringstream tempo_text;
-    tempo_text << "Tempo  : ";
+    tempo_text << "Tempo   ";
     draw_text(0, (UI::Text::font_size * 2) * 6, tempo_text.str());
+
+    std::stringstream rows_text;
+    rows_text << "Rows    ";
+    draw_text(0, (UI::Text::font_size * 2) * 7, rows_text.str());
+
+    std::stringstream hb_width_text;
+    hb_width_text << "HB width";
+    draw_text(0, (UI::Text::font_size * 2) * 9, hb_width_text.str());
+
+    std::stringstream hb_gain_text;
+    hb_gain_text << "HB gain";
+    draw_text(0, (UI::Text::font_size * 2) * 10, hb_gain_text.str());
 
     // Song length
     long long samples = data.order.size() * data.num_rows * data.ticklen;

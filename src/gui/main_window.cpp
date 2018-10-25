@@ -4,18 +4,31 @@
 #include <SDL_opengl.h>
 #include <sstream>
 #include <iostream>
+#include <ios>
 
 void MainWindow::save_song() {
     data.lock();
+
     patch_editor->update_data(data);
     tracker->update_data(data);
-   Json::Value song_json = data.as_json();
-    data.unlock();
+    Json::Value song_json = data.as_json();
+
     song_json["_patch_editor"] = patch_editor->as_json();
     song_json["_tracker"] = tracker->as_json();
 
     auto bin = data.bin();
     std::stringstream asm_str;
+
+    asm_str << std::fixed;
+    asm_str << "master_hb_c1:" << std::endl <<
+	"dd " << (1 - data.master_hb_coeff) << std::endl;
+    asm_str << "master_hb_c2:" << std::endl <<
+	"dd " << data.master_hb_coeff << std::endl;
+    asm_str << "master_hb_mix:" << std::endl <<
+	"dd " << data.master_hb_mix << std::endl;
+
+    data.unlock();
+
     for (auto *section : bin) {
 	asm_str << section->str();
     }
