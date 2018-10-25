@@ -3,7 +3,6 @@
 #include "types.hpp"
 #include "editor_window.hpp"
 #include "tracker_data.hpp"
-#include <json/json.h>
 #include <map>
 #include <set>
 
@@ -153,5 +152,5 @@ class PatchEditorWindow : public EditorWindow {
 
     // Convert patch editor state to synth instrument & trigger
     // point config. Other parts of &data are not modified.
-    void convert_instruments(TrackerData &data);
+    void update_data(TrackerData &data) override;
 };

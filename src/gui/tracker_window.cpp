@@ -30,11 +30,26 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
 			   6,
 			   tostr(data.num_rows),
 			   std::bind(&TrackerWindow::set_pattern_rows_cb, this,
-				     std::placeholders::_1)) {
+				     std::placeholders::_1)),
+      master_hb_coeff_textbox(UI::Text::char_width * 4 * 9,
+			      UI::Text::font_size * 2 * 8,
+			      6,
+			      tostr(data.master_hb_coeff),
+			      std::bind(&TrackerWindow::set_master_hb_coeff_cb, this,
+					std::placeholders::_1)),
+      master_hb_mix_textbox(UI::Text::char_width * 4 * 9,
+			    UI::Text::font_size * 2 * 9,
+			    6,
+			    tostr(data.master_hb_coeff),
+			    std::bind(&TrackerWindow::set_master_hb_mix_cb, this,
+				      std::placeholders::_1))
+{
     register_(order_shrink);
     register_(order_grow);
     register_(tempo_textbox);
     register_(pattern_rows_textbox);
+    register_(master_hb_coeff_textbox);
+    register_(master_hb_mix_textbox);
 }
 
 void TrackerWindow::key_down(const SDL_Keysym &sym) {
@@ -782,6 +797,22 @@ void TrackerWindow::set_pattern_rows_cb(const std::string &value) {
     cursor_move(0, 0);
 }
 
+void TrackerWindow::set_master_hb_coeff_cb(const std::string &value) {
+    float val = strtof(value.c_str(), NULL);
+    data.lock();
+    if (val >= 0.0 && val <= 1.0) {
+	data.master_hb_coeff = val;
+    }
+    data.unlock();
+}
+
+void TrackerWindow::set_master_hb_mix_cb(const std::string &value) {
+    float val = strtof(value.c_str(), NULL);
+    data.lock();
+    data.master_hb_mix = val;
+    data.unlock();
+}
+
 size_t TrackerWindow::get_current_pattern() {
     return current_pattern;
 }
@@ -799,4 +830,24 @@ void TrackerWindow::report_playstate(unsigned int current_pattern, unsigned int 
     playing_pattern = current_pattern;
     playing_row = current_row;
     playstate_mutex.unlock();
+}
+
+void TrackerWindow::update_data(TrackerData &data) {
+    data.master_hb_coeff = strtof(master_hb_coeff_textbox.value.c_str(), NULL);
+    data.master_hb_mix = strtof(master_hb_mix_textbox.value.c_str(), NULL);
+}
+
+Json::Value TrackerWindow::as_json() {
+    Json::Value json(Json::objectValue);
+    json["master_hb_coeff"] = master_hb_coeff_textbox.value;
+    json["master_hb_mix"] = master_hb_mix_textbox.value;
+    return json;
+}
+
+void TrackerWindow::from_json(Json::Value &json_) {
+    auto &json = json_["_tracker"];
+    if (json.isObject()) {
+	master_hb_coeff_textbox.value = json["master_hb_coeff"].asString();
+	master_hb_mix_textbox.value = json["master_hb_mix"].asString();
+    }
 }

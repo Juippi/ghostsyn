@@ -5,6 +5,10 @@
 %define FLT_STATE_FB1	   0
 %define FLT_STATE_FB2	   4
 
+;;; filter constants
+fc1:
+       dd 3.296875
+
 module_filter:
 	pusha
 	;; feedback coefficient

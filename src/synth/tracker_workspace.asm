@@ -23,6 +23,14 @@ song_ticklen:
 num_rows:
 	dd 0
 
+;;; master high boost filter parametrs
+master_hb_c1:
+	dd 0
+master_hb_c2:
+	dd 0
+master_hb_mix:
+	dd 0
+
 modules:
 	times (MODULE_DATA_BYTES * TRACKER_MAX_MODULES) dd 0
 

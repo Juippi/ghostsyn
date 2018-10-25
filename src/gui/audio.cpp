@@ -124,6 +124,7 @@ void Audio::update_synth(int order_offset) {
 		     section_triggers.data(), section_triggers.size(),
 		     module_count, ticklen,
 		     data.num_rows,
+		     1.0 - data.master_hb_coeff, data.master_hb_coeff, data.master_hb_mix,
 		     data.module_skip_flags.data(), data.module_skip_flags.size());
     } else {
 	std::cerr << "some data section(s) empty, can't configure synth!" << std::endl;

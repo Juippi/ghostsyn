@@ -37,6 +37,10 @@ public:
     std::vector<Pattern> patterns;
     std::vector<Module> modules;
 
+    // parameters for master high boost filter
+    float master_hb_coeff = 1.0;
+    float master_hb_mix = 0.0;
+
     // Optional feature for non-4k builds: per-track bitmasks to skip processing
     // some modules for speedk
     std::vector<uint8_t> module_skip_flags;

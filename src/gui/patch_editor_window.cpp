@@ -569,7 +569,7 @@ void PatchEditorWindow::del_module() {
     }
 }
 
-void PatchEditorWindow::convert_instruments(TrackerData &data) {
+void PatchEditorWindow::update_data(TrackerData &data) {
     // std::cerr << "*** convert_instruments, has " << modules.size() << " modules" << std::endl;
 
     if (has_connection_cycle()) {

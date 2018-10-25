@@ -6,10 +6,6 @@ global synth_update
 
 section .data
 
-;;; filter constants
-fc1:
-       dd 3.296875
-
 ;;; global vol, faded at the end
 global_volume:
 	dd 1.0
@@ -17,16 +13,10 @@ end_fade:
 	dd 0.99998
 
 ;;; state for master high boost filter
-master_hp_state:
+master_hb_state:
 	dd 0.0
 	dd 0.0
-master_hp_c1:
-	dd 0.2
-master_hp_c2:
-	dd 0.8
-master_hp_mix:
-	dd 2.5
-
+	
 ;;; other constants
 stereo_mod:
 	dd 1.003	; adjustment for 2nd ch. TODO: could be osc param?
@@ -646,19 +636,19 @@ was_master_out:
 
 	mov edx, edi
 	and edx, 0x04
-	add edx, master_hp_state
+	add edx, master_hb_state
 
 	fld st0
 	fld st0
 
-	fmul dword [master_hp_c1]
+	fmul dword [master_hb_c1]
 	fld dword [edx]
-	fmul dword [master_hp_c2]
+	fmul dword [master_hb_c2]
 	faddp
 
 	fst dword [edx]
 	fsubp
-	fmul dword [master_hp_mix]
+	fmul dword [master_hb_mix]
 	faddp
 
 	pop edx
@@ -724,9 +714,17 @@ synth_update:
 	mov esi, [eax + 44]
 	mov [num_rows], esi
 
-	;; per-channel module skip flags
+	;; master high boost filter params
 	mov esi, [eax + 48]
-	mov ecx, [eax + 52]
+	mov [master_hb_c1], esi
+	mov esi, [eax + 52]
+	mov [master_hb_c2], esi
+	mov esi, [eax + 56]
+	mov [master_hb_mix], esi
+
+	;; per-channel module skip flags
+	mov esi, [eax + 60]
+	mov ecx, [eax + 64]
 	mov edi, module_skip_flags
 	rep movsb
 

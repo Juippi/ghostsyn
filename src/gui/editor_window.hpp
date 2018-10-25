@@ -2,6 +2,8 @@
 
 #include "types.hpp"
 #include "ui_constants.hpp"
+#include "tracker_data.hpp"
+#include <json/json.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <memory>
@@ -157,4 +159,9 @@ public:
     // Draw contents of window. This is usually called after just_changed()
     // returns true, or the window becomes unoccluded or visible.
     virtual void update();
+
+    virtual void update_data(TrackerData &data) {}
+
+    virtual Json::Value as_json() { return Json::Value(); }
+    virtual void from_json(Json::Value &json) {}
 };

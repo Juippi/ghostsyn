@@ -7,10 +7,12 @@
 
 void MainWindow::save_song() {
     data.lock();
-    patch_editor->convert_instruments(data);
-    Json::Value song_json = data.as_json();
+    patch_editor->update_data(data);
+    tracker->update_data(data);
+   Json::Value song_json = data.as_json();
     data.unlock();
     song_json["_patch_editor"] = patch_editor->as_json();
+    song_json["_tracker"] = tracker->as_json();
 
     auto bin = data.bin();
     std::stringstream asm_str;
@@ -105,7 +107,9 @@ MainWindow::MainWindow(int width, int height, const std::string &song_filename_)
 	data.from_json(song_json);
 	patch_editor = new PatchEditorWindow(1024, 0, width - 1024, height, data.num_tracks,
 					 renderer, text_font, *this);
+	tracker = new TrackerWindow(0, 0, 1024, height, renderer, text_font, *this, data);
 	patch_editor->from_json(song_json);
+	tracker->from_json(song_json);
     } else {
 	// Create initial empty song
 	data.num_tracks = UI::Tracker::default_num_tracks;
@@ -115,8 +119,8 @@ MainWindow::MainWindow(int width, int height, const std::string &song_filename_)
 	data.order.push_back(0);
 	patch_editor = new PatchEditorWindow(1024, 0, width - 1024, height, data.num_tracks,
 					 renderer, text_font, *this);
+	tracker = new TrackerWindow(0, 0, 1024, height, renderer, text_font, *this, data);
     }
-    tracker = new TrackerWindow(0, 0, 1024, height, renderer, text_font, *this, data);
     children.push_back(tracker);
     children.push_back(patch_editor);
 }
@@ -158,16 +162,19 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    return;
 	case SDLK_F5:
 	    // TODO: acquire mutex before modifying data!
-	    patch_editor->convert_instruments(data);
+	    patch_editor->update_data(data);
+	    tracker->update_data(data);
 	    audio.play_song(0);
 	    return;
 	case SDLK_F6:
 	    // TODO: acquire mutex before modifying data!
-	    patch_editor->convert_instruments(data);
+	    patch_editor->update_data(data);
+	    tracker->update_data(data);
 	    audio.play_pattern(tracker->get_current_pattern(), 0);
 	    return;
 	case SDLK_F7:
-	    patch_editor->convert_instruments(data);
+	    patch_editor->update_data(data);
+	    tracker->update_data(data);
 	    audio.play_song(tracker->get_order_cursor_pos());
 	    break;
 	case SDLK_F8:

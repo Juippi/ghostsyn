@@ -36,6 +36,8 @@ protected:
 
     TextBox tempo_textbox;
     TextBox pattern_rows_textbox;
+    TextBox master_hb_coeff_textbox;
+    TextBox master_hb_mix_textbox;
 
     struct _colors {
 	const Color rownum = {160, 160, 160, 255};
@@ -78,6 +80,8 @@ protected:
 
     void set_tempo_cb(const std::string &value);
     void set_pattern_rows_cb(const std::string &value);
+    void set_master_hb_coeff_cb(const std::string &value);
+    void set_master_hb_mix_cb(const std::string &value);
 
 public:
     TrackerWindow(int x, int y, int width, int height, SDL_Renderer *renderer,
@@ -94,4 +98,9 @@ public:
     int get_order_cursor_pos();
 
     void report_playstate(unsigned int current_pattern, unsigned int current_row);
+
+    void update_data(TrackerData &data) override;
+
+    Json::Value as_json() override;
+    void from_json(Json::Value &json) override;
 };
