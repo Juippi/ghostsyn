@@ -381,7 +381,7 @@ no_alt_instr:
 
 	;; we trigger an envelope element, and set pitch of
 	;; immediately following osc element
-	mov dword [esi + ENV_PARAM_STAGE], 0
+	mov dword [esi + ENV_PARAM_STAGE], ENV_STAGE_ATTACK
 	fstp dword [esi + MODULE_DATA_BYTES + OSC_PARAM_ADD]
 
 	;;
@@ -433,11 +433,11 @@ no_trig_osc:
 	test al, 0x02
 	jz no_trig_env
 
-	;; trigger envelope (reset stage to 0)
+	;; trigger envelope (set stage to 1)
 	and eax, 0xfffffffc
 	add eax, esi
 %ifdef ENABLE_ENVELOPE
-	mov dword [eax + ENV_PARAM_STAGE], 0
+	mov dword [eax + ENV_PARAM_STAGE], ENV_STAGE_ATTACK
 %endif ;; ENABLE_ENVELOPE
 
 	and eax, 0xfffffffc
