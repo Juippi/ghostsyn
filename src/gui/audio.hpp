@@ -34,10 +34,10 @@ public:
 
     // SDL audio callback
     void callback(Uint8 *stream, int len);
-    // Update internal synth data from tracker data
-    void update_synth(int order_offset);
+    // Update internal synth state to get ready for playback
+    void update_synth(int order_offset, int start_row = 0);
 
-    void play_pattern(int pattern, int from_row);
+    void play_pattern(int pattern, int start_row = 0);
     void play_song(int from_order);
     void stop();
 };

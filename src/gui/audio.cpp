@@ -72,7 +72,7 @@ void Audio::callback(Uint8 *stream, int len) {
     }
 }
 
-void Audio::update_synth(int order_offset) {
+void Audio::update_synth(int order_offset, int start_row) {
     data.lock();
     std::vector<Section *> bin = data.bin();
     int module_count = static_cast<int>(data.modules.size());
@@ -123,7 +123,7 @@ void Audio::update_synth(int order_offset) {
 		     section_modules.data(), section_modules.size(),
 		     section_triggers.data(), section_triggers.size(),
 		     module_count, ticklen,
-		     data.num_rows,
+		     data.num_rows, start_row,
 		     1.0 - data.master_hb_coeff, data.master_hb_coeff, data.master_hb_mix,
 		     data.module_skip_flags.data(), data.module_skip_flags.size());
     } else {
@@ -131,10 +131,10 @@ void Audio::update_synth(int order_offset) {
     }
 }
 
-void Audio::play_pattern(int pattern, int from_row) {
+void Audio::play_pattern(int pattern, int start_row) {
     state = STATE_PLAYING_PATTERN;
     play_single_pattern_no = pattern;
-    update_synth(0);
+    update_synth(0, start_row);
     synth_running = true;
 }
 

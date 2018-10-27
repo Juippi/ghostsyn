@@ -714,23 +714,27 @@ synth_update:
 	mov esi, [eax + 44]
 	mov [num_rows], esi
 
-	;; master high boost filter params
+	;; start playback from this pattern row
 	mov esi, [eax + 48]
-	mov [master_hb_c1], esi
+	imul esi, NUM_TRACKS
+	mov [bss_pattern_pos], esi
+
+	;; master high boost filter params
 	mov esi, [eax + 52]
-	mov [master_hb_c2], esi
+	mov [master_hb_c1], esi
 	mov esi, [eax + 56]
+	mov [master_hb_c2], esi
+	mov esi, [eax + 60]
 	mov [master_hb_mix], esi
 
 	;; per-channel module skip flags
-	mov esi, [eax + 60]
-	mov ecx, [eax + 64]
+	mov esi, [eax + 64]
+	mov ecx, [eax + 68]
 	mov edi, module_skip_flags
 	rep movsb
 
 	xor eax, eax
 	mov [bss_order_pos], eax
-	mov [bss_pattern_pos], eax
 	mov [state_tick_ctr], eax ; this only exists in tracker build
 
 	;; reset synth state by zeroing work area

@@ -183,7 +183,8 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    // TODO: acquire mutex before modifying data!
 	    patch_editor->update_data(data);
 	    tracker->update_data(data);
-	    audio.play_pattern(tracker->get_current_pattern(), 0);
+	    audio.play_pattern(tracker->get_current_pattern(),
+			       tracker->get_current_row());
 	    return;
 	case SDLK_F7:
 	    patch_editor->update_data(data);

@@ -95,6 +95,7 @@ public:
 
     // get no. of currently shown pattern
     size_t get_current_pattern();
+    int get_current_row();
     int get_order_cursor_pos();
 
     void report_playstate(unsigned int current_pattern, unsigned int current_row);

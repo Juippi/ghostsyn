@@ -829,6 +829,10 @@ size_t TrackerWindow::get_current_pattern() {
     return current_pattern;
 }
 
+int TrackerWindow::get_current_row() {
+    return cursor_row;
+}
+
 int TrackerWindow::get_order_cursor_pos() {
     return order_cursor_pos;
 }
