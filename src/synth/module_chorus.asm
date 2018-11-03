@@ -2,10 +2,10 @@
 ;;; (TODO: does this need to have stereo modulation, or are stereo oscs enough?)
 
 ;;; esi
-%define CHO_VAL_IN	8
+%define CHO_VAL_IN	4
+%define CHO_VAL_MODAMP  8
 %define CHO_VAL_TIME	12
 %define CHO_VAL_MOD_ADD	16
-%define CHO_VAL_MODAMP  20
 
 ;;; ebp
 %define CHO_STATE_DELAY_POS	0

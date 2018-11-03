@@ -13,6 +13,7 @@ end_fade:
 	dd 0.99998
 
 ;;; state for master high boost filter
+;;; TODO: move to bss
 master_hb_state:
 	dd 0.0
 	dd 0.0
@@ -26,7 +27,7 @@ main_tune:
 oct_semitones:
 	dd 12		; number of notes per octave
 
-	%define	MODULE_DATA_SIZE 6
+	%define	MODULE_DATA_SIZE 5
 	%define MODULE_DATA_BYTES MODULE_DATA_SIZE * 4
 	%define MODULE_WORK_BYTES 65536 * 4
 
@@ -49,8 +50,6 @@ oct_semitones:
 	%define OSC_FLAG_NOISE 0x80000
 
 	%define OSC_FLAG_STEREO  0x80
-
-	%define MODULE_OUT_OFFSET  4
 
 	;; module types (byte 0 of module type word)
 	%define MODULE_TYPE_OSC        0x00
@@ -558,7 +557,8 @@ no_silence:
 %endif
 
 	;; element output now in st0
-	mov ebx, [esi + MODULE_OUT_OFFSET]
+	xor ebx, ebx
+	mov bl, [esi + 3]
 	test ebx, ebx
 	jnz not_master_out
 

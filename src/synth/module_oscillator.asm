@@ -1,8 +1,8 @@
 ;;; Parameters & state shared between channels
-%define OSC_PARAM_GAIN	   8
-%define OSC_PARAM_FREQ_MOD 12
-%define OSC_PARAM_ADD	   16
-%define OSC_PARAM_DETUNE2  20 ; 2nd osc detune
+%define OSC_PARAM_GAIN	   4
+%define OSC_PARAM_FREQ_MOD 8
+%define OSC_PARAM_ADD	   12
+%define OSC_PARAM_DETUNE2  16 ; 2nd osc detune
 
 ;;; Per-channel state
 %define OSC_STATE_CTR1	   0

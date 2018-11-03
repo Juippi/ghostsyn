@@ -107,7 +107,7 @@ void Audio::update_synth(int order_offset, int start_row) {
 
     std::cerr << "modules (" << data.modules.size() << ", "
 	      << section_modules.size() << " bytes):" << std::endl;
-    print_words(section_modules.data(), section_modules.size(), 24);
+    print_words(section_modules.data(), section_modules.size(), 20);
 
     std::cerr << "triggers (" << section_triggers.size() << " bytes):" << std::endl;
     print_words(section_triggers.data(), section_triggers.size(), 16);

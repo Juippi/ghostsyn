@@ -2,10 +2,10 @@
 ;;; independent channels (TODO: stereo link would be nice too)
 ;;; 
 
-%define COMP_VAL_IN        8
-%define COMP_VAL_THRESHOLD 12
-%define COMP_VAL_ATTACK    16
-%define COMP_VAL_RELEASE   20
+%define COMP_VAL_IN        4
+%define COMP_VAL_THRESHOLD 8
+%define COMP_VAL_ATTACK    12
+%define COMP_VAL_RELEASE   16
 
 %define COMP_STATE_GAIN    0
 	

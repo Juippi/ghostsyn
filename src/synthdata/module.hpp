@@ -93,9 +93,10 @@ public:
 
 	bytes  contents      type
 	----------------------------
-	0-3    type & flags  [int]
-	4-7    output offset [int]
-	8-23   module data   [float]
+	0-3    type & flags     [int]
+	4      output offset
+	5-7    module param 1   [float]
+	8-19   module params 2- [float]
 
 	type byte:
 	0 - osc

@@ -1,6 +1,6 @@
-%define FLT_PARAM_INPUT      8
-%define FLT_PARAM_CUTOFF     12
-%define FLT_PARAM_FB_GAIN    16
+%define FLT_PARAM_INPUT      4
+%define FLT_PARAM_CUTOFF     8
+%define FLT_PARAM_FB_GAIN    12
 
 %define FLT_STATE_FB1	   0
 %define FLT_STATE_FB2	   4

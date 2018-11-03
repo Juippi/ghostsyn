@@ -2,10 +2,10 @@
 ;;; TODO: with delay len modulation this could serve as chorus/flanger too
 
 ;;; esi
-%define REV_VAL_IN	8
-%define REV_VAL_TAPS    12	; no. of taps in delay line, 1 creates a simple delay
-%define REV_VAL_FEEDBACK 16
-%define REV_VAL_LP	20	; LP filter coefficient (for delay line input)
+%define REV_VAL_IN	 4
+%define REV_VAL_TAPS     8	; no. of taps in delay line, 1 creates a simple delay
+%define REV_VAL_FEEDBACK 12
+%define REV_VAL_LP	 16	; LP filter coefficient (for delay line input)
 
 ;;; ebp
 %define REV_STATE_DELAY_POS	0

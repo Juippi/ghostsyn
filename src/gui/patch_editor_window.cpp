@@ -338,8 +338,8 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 			// std::cerr << "connect: elem " << selected_module
 			//	  << " -> " << hovered_module << ":" << hovered_param << std::endl;
 			modules[selected_module].module.out_module = hovered_module;
-			// Synth parameters start after type and out offset words at idx 2
-			modules[selected_module].module.out_param = hovered_param + 2;
+			// Synth parameters start after type and out offset word at idx 1
+			modules[selected_module].module.out_param = hovered_param + 1;
 		    } else {
 			modules[selected_module].module.out_module = -1;
 			modules[selected_module].module.out_param = -1;
@@ -491,7 +491,7 @@ void PatchEditorWindow::update() {
 			  module2.x + module2.width / 2,
 			  module2.y - 16);
 	    } else {
-		int skip = (module2.module.type == Module::ModuleType::TYPE_OSC ? 3 : 1);
+		int skip = (module2.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
 		int y_off = UI::Text::char_height / 2 +
 		    ((module.module.out_param + skip) *
 		     (UI::Text::char_height + UI::Text::row_gap));

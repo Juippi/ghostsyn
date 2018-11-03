@@ -175,7 +175,7 @@ std::vector<Section *> TrackerData::bin() {
     BinSection *sect_triggers = new BinSection("trigger_points", "trigger_points");
     for (auto &p : trigger_points) {
 	char bin[4];
-	uint32_t b_offset = p.trig_module_idx * 24;
+	uint32_t b_offset = p.trig_module_idx * 20; // TODO: define mod. size as constant
 
 	if (p.trig_type == Trigger::SET_PITCH) {
 	    b_offset |= 0x01;

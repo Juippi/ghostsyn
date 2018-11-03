@@ -12,7 +12,7 @@ class PatchEditorWindow : public EditorWindow {
     static constexpr int MODULE_SIZE = 64;
     static constexpr int MODULE_AREA_PADDING = 8;
     static constexpr int NUM_INSTRUMENTS = 8;
-    
+
     class EditorModule {
     protected:
 	virtual int hovered_input_impl(int x, int y);

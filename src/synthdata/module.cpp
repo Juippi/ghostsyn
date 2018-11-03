@@ -131,9 +131,9 @@ Module::Module(ModuleType type_)
 	break;
     case TYPE_CHORUS:
 	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("modamp", 0.0f));
 	params.push_back(Param("time", 0.0f));
 	params.push_back(Param("freq", 0.0f));
-	params.push_back(Param("modamp", 0.0f));
 	break;
     }
     params.resize(4);
@@ -163,8 +163,8 @@ void Module::from_json(Json::Value &json, int my_index) {
 	params.push_back(Param("feedback", params_json["feedback"].asFloat()));
 	break;
     case TYPE_ENV:
-	params.push_back(Param("attack", params_json["attack"].asFloat(), 16));
 	params.push_back(Param("switch", params_json["switch"].asFloat()));
+	params.push_back(Param("attack", params_json["attack"].asFloat(), 16));
 	params.push_back(Param("release", params_json["release"].asFloat()));
 	params.push_back(Param("stage", 1));
 	break;
@@ -182,9 +182,9 @@ void Module::from_json(Json::Value &json, int my_index) {
 	break;
     case TYPE_CHORUS:
 	params.push_back(Param("input", 0.0f));
+	params.push_back(Param("modamp", params_json["modamp"].asFloat()));
 	params.push_back(Param("time", params_json["time"].asFloat()));
 	params.push_back(Param("freq", params_json["feedback"].asFloat()));
-	params.push_back(Param("modamp", params_json["modamp"].asFloat()));
 	break;
     default:
 	throw TDError("Unrecognized module type: ", json["type"].asString());
@@ -229,7 +229,8 @@ std::vector<Section *> Module::bin() {
     if (out_module < 0) {
 	out_offset = 0;
     } else {
-	out_offset = ((out_module - my_index) * 4 * 6 +
+	// TODO: turn magic numbers into constants
+	out_offset = ((out_module - my_index) * 4 * 5 +
 		      out_param * 4);
     }
 
@@ -240,9 +241,7 @@ std::vector<Section *> Module::bin() {
 	tmp[0] |= 0x80;
     }
     tmp[2] = osc_shape_flags[osc_shape];
-    res.push_back(new BinSection("modules", tmp));
-
-    memcpy(tmp.data(), &out_offset, sizeof(out_offset));
+    tmp[3] = out_offset;
     res.push_back(new BinSection("modules", tmp));
 
     for (auto &param : params) {
