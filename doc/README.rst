@@ -239,6 +239,24 @@ or some others to the oscillator output, or output pseudo-random noise instead.
 If stereo flag is set, left and right channels are detuned relative to each other
 with a fixed global constant, creating a nice wide stereo effect.
 
+Parameters
+''''''''''
+
+*gain*
+  Oscillator amplitude. Can be constant, but it's often also useful as a target
+  for envelope output.
+*frequency modulation*
+  Target for modulating oscillator frequency. Oscillator frequency == base freq *
+  (modulation + 1).
+*add (pitch)*
+  Oscillator pitch control, value to be added to osc value at each sample.
+  Can be 0 if oscillator is controlled by tracker, but if you need a constant
+  frequency oscillator such as LFO, set pitch here.
+*osc 2 tuning*
+  Frequency of second saw wave compared to first. Value of 0 effectively disables
+  the second saw. Use a value close to 1.0 for fatter sound, or you can also
+  create intervals for building chords with a smaller number of oscillators.
+
 Filter
 ^^^^^^
 
@@ -248,6 +266,18 @@ pleasant and unstable feedback (resonance) values can be quite narrow, but
 it can occasionally sound quite nice. It's also offers some variation to the
 often seen 'classic' state variable design.
 
+Parameters
+''''''''''
+
+*input*
+  Target for filter input.
+*cutoff*
+  Filter cutoff, range 0.0 - 1.0.
+*feedback (resonance)*
+  Controls filter resonance. Range 0.0 - 1.0, but high values risk making
+  the filter unstable, depending on the cutoff frequency. Usually at least
+  up to 0.8 should be usable.
+
 Envelope
 ^^^^^^^^
 
@@ -255,13 +285,54 @@ The envelope is a simple AD envelope with linear attack and exponential decay.
 Triggering envelope sets it to attack stage, where its output increases until
 set threshold, where it switches to decay.
 
+Parameters
+''''''''''
+
+*attack*
+  Per-sample add to envelope level during the linear attack phase.
+*switch level*
+  When envelope reaches this level, it switches from attack to decay.
+*decay*
+  Multiply envelope level by this value for each sample during the exponential
+  decay phase. Values slightly belov 1.0 are usually the usable ones.
+*stage*
+  Current envelope stage (1 for attack, 0 for decay). Usually 0 when tracker
+  controls envelope, but can also be set to 1 to trigger envelope once
+  at the start of song for fades, filter sweeps and such.
+
 Reverb
 ^^^^^^
 
 Stereo delay/reverb consisting of delay lines with variable number of
-pseudorandomly placed taps and LP filters. For stability,
-<number of taps> * <feedback> shouldn't exceed 1 by too much. LP filter
-coefficient should be in [0.0, 1.0] with higher values meaning lower cutoff.
+pseudorandomly placed taps and a LP filter. For stability,
+<number of taps> * <feedback> shouldn't exceed 1, but depending on LP
+filter cutoff, output may stay stable at slightly higher values too.
+
+Parameters
+''''''''''
+
+*input* 
+  Target for reverb input.
+*number of taps*
+  Number of taps in delay line; more taps means denser impulse response and
+  thus smoother reverb tail (but don't expect too much).
+*feedback*
+  Feedback in delay line. If taps * feedback > 1, output may become
+  unstable.
+*LP*
+  LP coefficient should be in [0.0, 1.0] with higher values meaning lower
+  cutoff (more HF attenuation).
+
+Chorus
+^^^^^^
+
+Rough sounding chorus effect without interpolation. May be replaced later
+with something else.
+
+Parameters
+''''''''''
+
+TODO
 
 TODO
 ----
