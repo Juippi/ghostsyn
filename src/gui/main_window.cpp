@@ -165,7 +165,7 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    }
 	    break;
 	}
-    } else {
+    } else if (sym.mod & KMOD_CTRL) {
 	switch (sym.sym) {
 	case SDLK_s:
 	    if (sym.mod & KMOD_CTRL) {
@@ -173,6 +173,9 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 		std::cerr << "song saved" << std::endl;
 	    }
 	    return;
+	}
+    } else {
+	switch (sym.sym) {
 	case SDLK_F5:
 	    // TODO: acquire mutex before modifying data!
 	    patch_editor->update_data(data);
