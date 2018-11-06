@@ -166,13 +166,13 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    break;
 	}
     } else if (sym.mod & KMOD_CTRL) {
-	switch (sym.sym) {
+	switch(sym.sym) {
 	case SDLK_s:
-	    if (sym.mod & KMOD_CTRL) {
-		save_song();
-		std::cerr << "song saved" << std::endl;
-	    }
-	    return;
+	    save_song();
+	    std::cerr << "song saved" << std::endl;
+	    break;
+	default:
+	    EditorWindow::key_down(sym);
 	}
     } else {
 	switch (sym.sym) {
@@ -181,14 +181,14 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    patch_editor->update_data(data);
 	    tracker->update_data(data);
 	    audio.play_song(0);
-	    return;
+	    break;
 	case SDLK_F6:
 	    // TODO: acquire mutex before modifying data!
 	    patch_editor->update_data(data);
 	    tracker->update_data(data);
 	    audio.play_pattern(tracker->get_current_pattern(),
 			       tracker->get_current_row());
-	    return;
+	    break;
 	case SDLK_F7:
 	    patch_editor->update_data(data);
 	    tracker->update_data(data);
@@ -196,9 +196,10 @@ void MainWindow::key_down(const SDL_Keysym &sym) {
 	    break;
 	case SDLK_F8:
 	    audio.stop();
-	    return;
+	    break;
+	default:
+	    EditorWindow::key_down(sym);
 	}
-	EditorWindow::key_down(sym);
     }
 }
 
