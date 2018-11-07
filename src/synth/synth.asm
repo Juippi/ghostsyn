@@ -17,7 +17,7 @@ end_fade:
 master_hb_state:
 	dd 0.0
 	dd 0.0
-	
+
 ;;; other constants
 stereo_mod:
 	dd 1.003	; adjustment for 2nd ch. TODO: could be osc param?
@@ -32,8 +32,6 @@ oct_semitones:
 	%define MODULE_WORK_BYTES 65536 * 4
 
 	%define NUM_TRACKS 8
-
-	%define MAX_NUM_ROWS 128 ; reserve space for max. this many rows per pattern
 
 %ifdef TRACKER_EMBED
 	;; include empty data for tracker use
@@ -167,7 +165,11 @@ synth:
 	;; eax = eax / NUM_TRACKS
 	push edx
 	xor edx, edx
+%ifdef TRACKER_EMBED
+	mov edi, [num_tracks]
+%else
 	mov edi, NUM_TRACKS
+%endif
 	idiv edi
 	pop edx
 
@@ -196,7 +198,11 @@ synth:
 	lea ebx, [module_skip_flags]	; track idx for module masking
 
 	lea edi, [bss_modules]	; module set for each track goes here
+%ifdef TRACKER_EMBED
+	mov ecx, [num_tracks]
+%else
 	mov ecx, NUM_TRACKS
+%endif
 setup_loop:
 	push ecx
 
@@ -281,7 +287,11 @@ synth_loop:
 	;; work area pointer for module
 	lea ebp, [bss_work]
 
+%ifdef TRACKER_EMBED
+	mov ecx, [num_tracks]
+%else
 	mov ecx, NUM_TRACKS
+%endif
 tracks_loop:
 	push ecx
 
@@ -300,7 +310,7 @@ tracks_loop:
 	mov bl, [ebx + order]
 %ifdef TRACKER_EMBED
 	imul ebx, [num_rows]
-	imul ebx, NUM_TRACKS
+	imul ebx, [num_tracks]
 %else
 	imul ebx, NUM_TRACKS * NUM_ROWS
 %endif
@@ -402,7 +412,11 @@ no_noteoff:
 	pusha
 
 	neg ecx
+%ifdef TRACKER_EMBED
+	add ecx, [num_tracks]
+%else
 	add ecx, NUM_TRACKS
+%endif
 	imul ecx, (2 * 4 * 4)	; up to 4 triggers / instrument, 2 instruments per channel
 
 	test al, 0x80
@@ -713,23 +727,26 @@ synth_update:
 	;; number of rows in pattern
 	mov esi, [eax + 44]
 	mov [num_rows], esi
+	;; number of tracks
+	mov esi, [eax + 48]
+	mov [num_tracks], esi
 
 	;; start playback from this pattern row
-	mov esi, [eax + 48]
+	mov esi, [eax + 52]
 	imul esi, NUM_TRACKS
 	mov [bss_pattern_pos], esi
 
 	;; master high boost filter params
-	mov esi, [eax + 52]
-	mov [master_hb_c1], esi
 	mov esi, [eax + 56]
-	mov [master_hb_c2], esi
+	mov [master_hb_c1], esi
 	mov esi, [eax + 60]
+	mov [master_hb_c2], esi
+	mov esi, [eax + 64]
 	mov [master_hb_mix], esi
 
 	;; per-channel module skip flags
-	mov esi, [eax + 64]
-	mov ecx, [eax + 68]
+	mov esi, [eax + 68]
+	mov ecx, [eax + 72]
 	mov edi, module_skip_flags
 	rep movsb
 
