@@ -21,6 +21,8 @@ public:
     unsigned int num_tracks = 8;
 
     static const int max_num_rows = 128;
+    static const int max_num_tracks = 8;
+    static const int max_num_modules = 64;
 
     class Trigger {
     public:
@@ -32,7 +34,7 @@ public:
 
     // 2 * 4 per track (4 trigs per instruments, primary & alt instr per track)
     std::vector<Trigger> trigger_points;
-    
+
     std::vector<uint8_t> order;
     std::vector<Pattern> patterns;
     std::vector<Module> modules;

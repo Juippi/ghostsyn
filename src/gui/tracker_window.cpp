@@ -106,6 +106,10 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		cursor_area = CURSOR_AREA_ORDER;
 		changed = true;
 		break;
+	    case SDLK_m:
+		mute_flags[cursor_x / 4] = !mute_flags[cursor_x / 4];
+		changed = true;
+		break;
 
 	    // Helpers to kbds without numpad
 	    case SDLK_LEFT:
@@ -371,17 +375,15 @@ void TrackerWindow::update() {
 	    int start_y = TRACKER_START_Y + UI::Tracker::row_pad + ((UI::Text::font_size * 2) + UI::Tracker::row_pad) * disp_row;
 
 	    Color cell_color;
-	    if (row_idx == cursor_row) {
+	    if (mute_flags[track_idx]) {
+		cell_color = colors.tracker_bg;
+	    } else if (row_idx == cursor_row) {
 		cell_color = colors.cursor_row;
 	    } else if (playing_pattern == current_pattern &&
 		       playing_row == static_cast<unsigned int>(row_idx)) {
 		cell_color = colors.play_cursor;
 	    } else if (row_idx % 2 == 0) {
 		cell_color = colors.row_2;
-	    // } else if (row_idx % 24 == 0) {
-	    //	cell_color = colors.row_16;
-	    // } else if (row_idx % 6 == 0) {
-	    //	cell_color = colors.row_4;
 	    } else {
 		cell_color = colors.tracker_bg;
 	    }
@@ -849,6 +851,15 @@ void TrackerWindow::report_playstate(unsigned int current_pattern, unsigned int 
 void TrackerWindow::update_data(TrackerData &data) {
     data.master_hb_coeff = strtof(master_hb_coeff_textbox.value.c_str(), NULL);
     data.master_hb_mix = strtof(master_hb_mix_textbox.value.c_str(), NULL);
+    // Update module skip flags according to track mutes
+    // FIXME: currently this relies on being called only after PatchEditorWindow::update_data()
+    for (auto i : irange(0, TrackerData::max_num_tracks)) {
+	if (mute_flags[i]) {
+	    for (auto m : irange(0, TrackerData::max_num_modules)) {
+		data.module_skip_flags[i * TrackerData::max_num_modules + m] = 1;
+	    }
+	}
+    }
 }
 
 Json::Value TrackerWindow::as_json() {

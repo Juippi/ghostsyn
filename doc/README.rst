@@ -191,6 +191,10 @@ Keyboard:
 | Ctrl-o    | Switch between pattern and |
 |           | order editing              |
 +-----------+----------------------------+
+| Ctrl-m    | Mute/unmute track          |
+|           | (takes effect after play-  |
+|           | back restart)              |
++-----------+----------------------------+
 
 Mouse:
 

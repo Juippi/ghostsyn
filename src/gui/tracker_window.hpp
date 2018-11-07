@@ -30,6 +30,9 @@ protected:
     unsigned int playing_pattern = 0;
     unsigned int playing_row = 0;
 
+    // Track mute flags
+    std::vector<bool>mute_flags = std::vector<bool>(TrackerData::max_num_tracks, false);
+
     Button order_shrink;
     Button order_grow;
     int order_cursor_pos = 0;
