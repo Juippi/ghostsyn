@@ -37,14 +37,14 @@ Json::Value TrackerData::as_json() {
     json["order"] = order_json;
 
     Json::Value trigger_points_json(Json::arrayValue);
-    for (auto &point : trigger_points) {
 #if 0
+    for (auto &point : trigger_points) {
 	Json::Value point_json(Json::arrayValue);
 	point_json.append(point.first);
 	point_json.append(point.second);
 	trigger_points_json.append(point_json);
-#endif
     }
+#endif
     json["trigger_points"] = trigger_points_json;
 
     Json::Value patterns_json(Json::arrayValue);
@@ -80,12 +80,12 @@ void TrackerData::from_json(Json::Value &json) {
 	std::cerr << "add to order " << p.asInt() << std::endl;
 	order.push_back(p.asInt());
     }
-    for (auto &tp_json : json["trigger_points"]) {
 #if 0
+    for (auto &tp_json : json["trigger_points"]) {
 	std::cerr << "add trigger point" << std::endl;
 	trigger_points.push_back(std::pair<int, int>(tp_json[0].asInt(), tp_json[1].asInt()));
-#endif
     }
+#endif
     Json::Value patterns_json = json["patterns"];
     for (auto &p : patterns_json) {
 	std::cerr << "load pattern" << std::endl;
@@ -94,10 +94,9 @@ void TrackerData::from_json(Json::Value &json) {
 	patterns.push_back(pattern);
     }
     Json::Value modules_json = json["modules"];
-    int module_idx = 0;
     for (auto &e : modules_json) {
-	std::cerr << "load module " << module_idx << std::endl;
-	modules.push_back(Module(e, module_idx++));
+	std::cerr << "load module" << std::endl;
+	modules.push_back(Module(e));
     }
 }
 
@@ -125,8 +124,8 @@ std::vector<uint8_t> TrackerData::modules_bin() {
 
 std::vector<uint8_t> TrackerData::trigger_points_bin() {
     std::vector<uint8_t> res;
-    for (auto &p : trigger_points) {
 #if 0
+    for (auto &p : trigger_points) {
 	// dwords
 	res.push_back(0);
 	res.push_back(0);
@@ -136,8 +135,8 @@ std::vector<uint8_t> TrackerData::trigger_points_bin() {
 	res.push_back(0);
 	res.push_back(0);
 	res.push_back(p.second);
-#endif
     }
+#endif
     return res;
 }
 

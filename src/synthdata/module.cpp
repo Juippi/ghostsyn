@@ -92,8 +92,8 @@ Json::Value Module::Param::as_json() const {
 
 Module::Module() {}
 
-Module::Module(Json::Value &json, int my_index_) : my_index(my_index_) {
-    from_json(json, my_index);
+Module::Module(Json::Value &json) {
+    from_json(json);
 }
 
 Module::Module(ModuleType type_)
@@ -139,7 +139,7 @@ Module::Module(ModuleType type_)
     params.resize(4);
 }
 
-void Module::from_json(Json::Value &json, int my_index) {
+void Module::from_json(Json::Value &json) {
     params.clear();
     type = name_types.at(json["type"].asString());
     out_op = name_ops.at(json["op"].asString());

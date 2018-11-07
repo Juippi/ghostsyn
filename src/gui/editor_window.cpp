@@ -224,14 +224,14 @@ void EditorWindow::draw_modal_input(int x, int y,
 	      value + "_");
 }
 
-void EditorWindow::mouse_move(int x, int y, bool inside) {
+void EditorWindow::mouse_move(int x, int y, [[maybe_unused]] bool inside) {
     for (auto &child : children) {
 	child->mouse_move(x - child->offset_x, y - child->offset_y,
 			  in_child(child, x, y));
     }
 }
 
-void EditorWindow::mouse_click(int button, int x, int y, bool inside) {
+void EditorWindow::mouse_click(int button, int x, int y, [[maybe_unused]] bool inside) {
     for (auto &child : children) {
 	child->mouse_click(button, x - child->offset_x, y - child->offset_y,
 			   in_child(child, x, y));
@@ -259,7 +259,7 @@ void EditorWindow::mouse_click(int button, int x, int y, bool inside) {
     }
 }
 
-void EditorWindow::mouse_release(int button, int x, int y, bool inside) {
+void EditorWindow::mouse_release(int button, int x, int y, [[maybe_unused]] bool inside) {
     for (auto &child : children) {
 	child->mouse_release(button, x - child->offset_x, y - child->offset_y,
 			     in_child(child, x, y));

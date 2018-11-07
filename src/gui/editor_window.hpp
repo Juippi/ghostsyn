@@ -160,8 +160,8 @@ public:
     // returns true, or the window becomes unoccluded or visible.
     virtual void update();
 
-    virtual void update_data(TrackerData &data) {}
+    virtual void update_data([[maybe_unused]] TrackerData &data) {}
 
     virtual Json::Value as_json() { return Json::Value(); }
-    virtual void from_json(Json::Value &json) {}
+    virtual void from_json([[maybe_unused]] Json::Value &json) {}
 };

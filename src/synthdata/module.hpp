@@ -13,7 +13,7 @@ public:
     typedef enum {TYPE_OSC, TYPE_FILTER, TYPE_ENV, TYPE_COMP, TYPE_REVERB, TYPE_CHORUS} ModuleType;
 
     Module();
-    Module(Json::Value &json, int my_index);
+    Module(Json::Value &json);
     Module(ModuleType type);
     class Param {
     public:
@@ -84,7 +84,7 @@ public:
 
     std::vector <Param> params;
 
-    void from_json(Json::Value &json, int my_index);
+    void from_json(Json::Value &json);
     Json::Value as_json();
 
     /** Dump module as binary for synth

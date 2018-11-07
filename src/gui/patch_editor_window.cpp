@@ -64,9 +64,6 @@ bool PatchEditorWindow::EditorModule::is_inside(int px, int py) {
 	    py >= y && py <= (y + height));
 }
 
-void PatchEditorWindow::EditorModule::draw(int x, int y) {
-}
-
 void PatchEditorWindow::clamp_module_pos(EditorModule &module) {
     module.x = std::min(std::max(module.x, MODULE_AREA_PADDING),
 			 width - (MODULE_SIZE + MODULE_AREA_PADDING));
@@ -190,10 +187,10 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
     }
 
     instrument_triggers.resize(num_tracks);
-    for (int i : irange(0, num_tracks)) {
+    for ([[maybe_unused]] int i : irange(0, num_tracks)) {
 	track_instruments.push_back(std::pair<int, int>(0, 0));
     }
-    for (int i : irange(0, PatchEditorWindow::NUM_INSTRUMENTS)) {
+    for ([[maybe_unused]] int i : irange(0, PatchEditorWindow::NUM_INSTRUMENTS)) {
 	instrument_triggers.push_back(std::pair<int, int>(0, 0));
     }
 }
@@ -213,7 +210,7 @@ void PatchEditorWindow::from_json(Json::Value &json_) {
 	module.height = module_json["height"].asInt();
 	module.page = module_json["page"].asInt();
 	module.is_master_out = module_json["is_master_out"].asBool();
-	module.module.from_json(module_json["module"], 0);
+	module.module.from_json(module_json["module"]);
 	module.string_trigger = module_json["string_trigger"].asString();
 	module.trigger_instrument = module_json["trigger_instrument"].asInt();
 	for (auto &string_value : module_json["string_values"]) {
@@ -451,7 +448,6 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 	}
 	// Parameters w/ inputs
 	for (auto i : irange(0u, module.module.params.size())) {
-	    const Module::Param &param = module.module.params[i];
 	    // Parameter connection point
 	    draw_line(module.x, module.y + y_off + UI::Text::char_height / 2,
 		      module.x - 16, module.y + y_off + UI::Text::char_height / 2);
@@ -484,7 +480,6 @@ void PatchEditorWindow::update() {
 	    static_cast<size_t>(module.module.out_module) < modules.size() &&
 	    module.module.out_param >= 0) {
 	    auto &module2 = modules[module.module.out_module];
-	    int y_off;
 	    if (module2.is_master_out) {
 		draw_line(module.x + module.width / 2,
 			  module.y + module.height + 16,
@@ -769,7 +764,7 @@ void PatchEditorWindow::update_data(TrackerData &data) {
 		}
 	    }
 
-	    for (int i : irange(0, triggers_left)) {
+	    for ([[maybe_unused]] int i : irange(0, triggers_left)) {
 		// std::cerr << " null trigger: do nothing" << std::endl;
 		data.trigger_points.push_back(TrackerData::Trigger()); // null trigger
 	    }

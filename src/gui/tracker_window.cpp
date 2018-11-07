@@ -359,7 +359,6 @@ void TrackerWindow::update() {
 	lineno.fill('0');
 	lineno << std::hex << row_idx;
 
-	SDL_Color text_color = {160, 160, 160, 255};
 	draw_text_hw(4, TRACKER_START_Y + UI::Tracker::row_pad + ((UI::Text::font_size * 2) + UI::Tracker::row_pad) * disp_row,
 		     lineno.str(), Color(160, 160, 160, 255));
 
@@ -541,7 +540,6 @@ void TrackerWindow::update() {
 }
 
 void TrackerWindow::cursor_move(int x, int y) {
-    Pattern &cp = data.patterns[current_pattern];
     if (x < 0) {
 	cursor_x = std::max(0, cursor_x + x);
     } else {

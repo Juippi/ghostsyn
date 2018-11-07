@@ -1,7 +1,7 @@
 include ../common.mk
 
 OBJS=algotests.o
-CXXFLAGS=$(COMMON_CXXFLAGS)
+CXXFLAGS=$(COMMON_CXXFLAGS) -Wno-unused
 LDFLAGS=$(COMMON_LDFLAGS) -lsndfile
 
 all: algotests

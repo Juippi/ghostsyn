@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
 	bool quit = false;
 
 	SDL_Event event;
-	SDL_Keycode prev_keycode = 0;
 	bool show = false;
 	int wait_timeout = 0;
 

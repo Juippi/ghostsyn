@@ -50,7 +50,6 @@ class PatchEditorWindow : public EditorWindow {
 
 	Module module;
 
-	virtual void draw(int x, int y);
 	virtual bool is_inside(int x, int y);
 	virtual int hovered_param(int x, int y);
 	virtual int hovered_input(int x, int y);
