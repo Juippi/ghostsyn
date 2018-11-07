@@ -195,6 +195,10 @@ Keyboard:
 |           | (takes effect after play-  |
 |           | back restart)              |
 +-----------+----------------------------+
+| Shift-    | Toggle mute/unmute all     |
+| Ctrl-m    | (takes effect after play-  |
+|           | back restart)              |
++-----------+----------------------------+
 
 Mouse:
 

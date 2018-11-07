@@ -57,7 +57,43 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 
     // no numpad
     if (cursor_area == CURSOR_AREA_TRACKER) {
-	if (sym.mod & KMOD_CTRL) {
+	if (sym.mod & KMOD_CTRL && sym.mod & KMOD_SHIFT) {
+	    switch(sym.sym) {
+	    case SDLK_c:
+		copied_pattern = data.get_pattern(current_pattern);
+		changed = true;
+		break;
+	    case SDLK_x:
+		copied_pattern = data.get_pattern(current_pattern);
+		data.clear_pattern(current_pattern);
+		changed = true;
+		break;
+	    case SDLK_v:
+		if (copied_pattern.has_value()) {
+		    data.set_pattern(current_pattern, copied_pattern.value());
+		    changed = true;
+		}
+		break;
+	    case SDLK_m:
+	    {
+		bool all_unmuted = true;
+		for (auto i : irange(0u, data.num_tracks)) {
+		    if (mute_flags[i]) {
+			all_unmuted = false;
+			break;
+		    }
+		}
+		bool new_mute = all_unmuted;
+		std::cerr << "keke " << new_mute << std::endl;
+		for (auto i : irange(0u, data.num_tracks)) {
+		    mute_flags[i] = new_mute;
+		}
+		changed = true;
+	    }
+	    break;
+	    }
+
+	} else if (sym.mod & KMOD_CTRL) {
 	    switch (sym.sym) {
 	    case SDLK_0:
 		current_instrument = 0;
@@ -128,50 +164,26 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		change_octave(1);
 		changed = true;
 		break;
-	    }
-
-	    // CTRL-SHIFT-[xcv] : cut/copy/paste pattern
-	    if (sym.mod & KMOD_SHIFT) {
-		switch(sym.sym) {
-		case SDLK_c:
-		    copied_pattern = data.get_pattern(current_pattern);
-		    changed = true;
-		    break;
-		case SDLK_x:
-		    copied_pattern = data.get_pattern(current_pattern);
-		    data.clear_pattern(current_pattern);
-		    changed = true;
-		    break;
-		case SDLK_v:
-		    if (copied_pattern.has_value()) {
-			data.set_pattern(current_pattern, copied_pattern.value());
-			changed = true;
-		    }
-		break;
-		}
 
 	    // CTRL-[xcv] : cut/copy/paste track
-	    } else {
-		switch(sym.sym) {
-		case SDLK_c:
-		    copied_track = data.get_track(current_pattern, cursor_x / 4);
-		    changed = true;
-		    break;
-		case SDLK_x:
-		    copied_track = data.get_track(current_pattern, cursor_x / 4);
-		    data.clear_track(current_pattern, cursor_x / 4);
-		    changed = true;
-		    break;
-		case SDLK_v:
-		    if (copied_track.has_value()) {
-			data.set_track(current_pattern, cursor_x / 4, copied_track.value());
-			changed = true;
-		    }
+	    case SDLK_c:
+		copied_track = data.get_track(current_pattern, cursor_x / 4);
+		changed = true;
 		break;
+	    case SDLK_x:
+		copied_track = data.get_track(current_pattern, cursor_x / 4);
+		data.clear_track(current_pattern, cursor_x / 4);
+		changed = true;
+		break;
+	    case SDLK_v:
+		if (copied_track.has_value()) {
+		    data.set_track(current_pattern, cursor_x / 4, copied_track.value());
+		    changed = true;
 		}
+		break;
 	    }
 
-	} else {
+	} else { // no CTRL, no SHIFT
 
 	    switch (sym.sym) {
 	    case SDLK_UP:
