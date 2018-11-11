@@ -84,7 +84,6 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		    }
 		}
 		bool new_mute = all_unmuted;
-		std::cerr << "keke " << new_mute << std::endl;
 		for (auto i : irange(0u, data.num_tracks)) {
 		    mute_flags[i] = new_mute;
 		}
@@ -146,6 +145,32 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		mute_flags[cursor_x / 4] = !mute_flags[cursor_x / 4];
 		changed = true;
 		break;
+	    case SDLK_l:
+	    {
+		// Toggle solo: if current track is already soloed (only non-muted),
+		// unmute all tracks, otherwise unmute all other tracks
+		bool solo = false;
+		for (auto i : irange(0u, data.num_tracks)) {
+		    if (!mute_flags[i] &&
+			static_cast<int>(i) != (cursor_x / 4)) {
+			solo = true;
+			break;
+		    }
+		}
+		for (auto i : irange(0u, data.num_tracks)) {
+		    if (solo) {
+			if (static_cast<int>(i) == (cursor_x / 4)) {
+			    mute_flags[i] = false;
+			} else {
+			    mute_flags[i] = true;
+			}
+		    } else {
+			mute_flags[i] = false;
+		    }
+		}
+		changed = true;
+	    }
+	    break;
 
 	    // Helpers to kbds without numpad
 	    case SDLK_LEFT:

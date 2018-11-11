@@ -199,6 +199,9 @@ Keyboard:
 | Ctrl-m    | (takes effect after play-  |
 |           | back restart)              |
 +-----------+----------------------------+
+| Ctrl-l    | Solo/unsolo track (after   |
+|           | playback restart)          |
++-----------+----------------------------+
 
 Mouse:
 
