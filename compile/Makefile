@@ -48,7 +48,7 @@ clean:
 _build_rendertest: rendertest.cpp synth_att.o
 	g++ -m32 -o rendertest $^ -lsndfile
 
-rendertest: rendertest.cpp synth_att.o
+rendertest: sizes rendertest.cpp synth_att.o
 	docker run -v $(CURDIR):/src buster-32-buildenv:latest \
 		make -C /src _build_rendertest
 	time ./rendertest out.wav

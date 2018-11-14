@@ -124,7 +124,7 @@ section .text
 %include "module_oscillator.asm"
 
 %ifdef ENABLE_FILTER
-%include "module_filter.asm"
+%include "module_filter_v2.asm"
 %endif ;; ENABLE_FILTER
 
 %ifdef ENABLE_ENVELOPE
@@ -531,7 +531,7 @@ no_osc:
 %ifdef ENABLE_FILTER
 	cmp al, MODULE_TYPE_FILTER
 	jne no_filter
-	call module_filter
+	call module_filter_v2
 no_filter:
 %endif
 
