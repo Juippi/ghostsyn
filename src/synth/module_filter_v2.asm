@@ -15,10 +15,12 @@ module_filter_v2:
 	pusha
 
 	;; Scale feedback with cutoff for increased stability & more usable sound
-	fld dword [esi + FLT_PARAM_FB]
 	fld dword [esi + FLT_PARAM_CUTOFF]
+	fabs			; safety
+	fld st0			; st0 == st1 == cutoff
+	fmul dword [esi + FLT_PARAM_FB]
 	fmul dword [fc1]
-	fmulp
+	;; st0: scaled feedback, st1: flt cutoff
 
 	;; add input to feedback
 	fld dword [ebp + FLT1_STATE_Y]
@@ -27,30 +29,29 @@ module_filter_v2:
 	fmulp			; *= feedback
 	fsin			; waveshape feedback signal
 	fadd dword [esi + FLT_PARAM_INPUT]
-	;; st0: (input + feedback)
+	;; st0: (input + feedback), st1: flt cutoff
 
 	;; 1st LP filter
-	fmul dword [esi + FLT_PARAM_CUTOFF]
-	fabs			; safety
+	fmul st1		; st0 = st0 * st1
 	fld1
-	fsub dword [esi + FLT_PARAM_CUTOFF]
-	fabs			; safety
+	fsub st2
 	fmul dword [ebp + FLT1_STATE_Y]
 	faddp
 	fst dword [ebp + FLT1_STATE_Y]
 
+	add ebp, 4
+
 	;; 2nd LP filter
-	fld dword [esi + FLT_PARAM_CUTOFF]	
-	fadd dword [esi + FLT_PARAM_CUTOFF]
-	fmulp
+	fmul st1
 	fld1
-	fsub dword [esi + FLT_PARAM_CUTOFF]
-	fsub dword [esi + FLT_PARAM_CUTOFF]
-	fmul dword [ebp + FLT2_STATE_Y]
+	fsub st2
+	fmul dword [ebp + FLT1_STATE_Y] ; actually FLT2_STATE_Y now
 	faddp
-	fst dword [ebp + FLT2_STATE_Y]
+	fst dword [ebp + FLT1_STATE_Y]
 
 	;; TODO: LP/HP switch
+	fxch st0, st1
+	fstp st0
 
 	popa
 	ret
