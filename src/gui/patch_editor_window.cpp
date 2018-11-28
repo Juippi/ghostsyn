@@ -8,8 +8,10 @@
 #include <list>
 #include <cstdlib>
 #include <boost/range/irange.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 using boost::irange;
+using boost::adaptors::reversed;
 
 int PatchEditorWindow::EditorModule::hovered_input_impl(int px, int py) {
     // N params + 1 trigger field + stereo toggle + shape selection
@@ -268,7 +270,7 @@ void PatchEditorWindow::mouse_move(int x, int y, bool inside) {
 	    clamp_module_pos(modules[selected_module]);
 	    changed = true;
 	} else {
-	    for (size_t i : irange(0u, modules.size())) {
+	    for (size_t i : irange(0u, modules.size()) | reversed) {
 		auto &module = modules[i];
 
 		if (!module.is_master_out && module.page != shown_page) {
