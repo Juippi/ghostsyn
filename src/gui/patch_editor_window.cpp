@@ -402,15 +402,16 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 				     int idx) {
     draw_rect(module.x, module.y,
 	      module.width, module.height,
-	      Colors::default_color_bg, true);
+	      Colors::module_bg, true);
     draw_rect(module.x, module.y,
 	      module.width, module.height, edge_color);
-    draw_text_hw(module.x + 1, module.y + 1, module.label);
+    draw_text_hw(module.x + 1, module.y + 1, module.label,
+		 Colors::module_text, Colors::module_bg);
     std::stringstream idx_str;
     idx_str << idx;
     draw_text_small(module.x + module.width - Text::char_width * idx_str.str().size() - 3,
-		    module.y + 1,
-		    idx_str.str());
+		    module.y + 1, idx_str.str(),
+		    Colors::module_text, Colors::module_bg);
 
     if (module.is_master_out) {
 	draw_line(module.x + module.width / 2, module.y,
@@ -431,8 +432,8 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
     if (!module.is_master_out) {
 	if (module.module.type == Module::ModuleType::TYPE_OSC) {
 	    // Stereo checkbox
-	    draw_text_small(module.x, module.y + y_off,
-			    "ster");
+	    draw_text_small(module.x, module.y + y_off, "ster",
+			    Colors::module_text, Colors::module_bg);
 	    int cbox_x = module.x + 1 + Text::char_width * 5;
 	    int cbox_y = module.y + y_off;
 	    int cbox_w = Text::char_width * 2;
@@ -458,7 +459,8 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 		      4, 4);
 	    // Parameter label & value
 	    draw_text_small(module.x + 1, module.y + y_off,
-			    module_param_labels[module.module.type][i]);
+			    module_param_labels[module.module.type][i],
+			    Colors::module_text, Colors::module_bg);
 	    draw_text_small(module.x + 1 + Text::char_width * 5,
 			    module.y + y_off, module.string_values[i]);
 	    if (is_hovered && hovered_param == static_cast<int>(i)) {
