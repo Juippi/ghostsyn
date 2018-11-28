@@ -42,20 +42,6 @@ protected:
     TextBox master_hb_coeff_textbox;
     TextBox master_hb_mix_textbox;
 
-    struct _colors {
-	const Color rownum = {160, 160, 160, 255};
-	const Color text = {240, 240, 240, 255};
-	const Color cursor_pos = {130, 130, 50, 255};
-	const Color cursor_row = {80, 80, 30, 255};
-	const Color row_16 = {30, 30, 60, 255};
-	const Color row_4 = {40, 40, 20, 255};
-	const Color row_2 = {40, 40, 20, 255};
-	const Color tracker_bg = {20, 20, 0, 255};
-	const Color play_cursor = {160, 100, 20, 255};
-	const Color instrument_num = {130, 130, 130, 255};
-	const Color order_bg_1 = {50, 50, 90, 255};
-	const Color order_bg_2 = {20, 20, 50, 255};
-    } colors;
     const unsigned int octave_min = 0;
     const unsigned int octave_max = 8;
 

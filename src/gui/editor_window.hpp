@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 #include "ui_constants.hpp"
+#include "ui_colors.hpp"
 #include "tracker_data.hpp"
 #include <json/json.h>
 #include <SDL.h>
@@ -42,11 +43,8 @@ protected:
     TTF_Font *text_font = 0;
     ModalPromptInterface &prompt_input;
 
-    static const Color default_color_fg;
-    static const Color default_color_bg;
-
     std::vector<EditorWindow *> children;
-    
+
     void draw_text_impl(int x, int y, const std::string &text, const Color &color_fg,
 			const Color &color_bg, int width_mult, int height_mult);
 
@@ -131,21 +129,23 @@ public:
 
     virtual void focus_enter();
     virtual void focus_leave();
-    
-    void draw_rect(int x, int y, int width, int height, const Color &color = default_color_fg,
+
+    void draw_rect(int x, int y, int width, int height,
+		   const Color &color = UI::Colors::default_color_fg,
 		   bool filled = false);
-    void draw_rect(const Rect &rect, const Color &color = default_color_fg,
+    void draw_rect(const Rect &rect, const Color &color = UI::Colors::default_color_fg,
 		   bool filled = false);
-    void draw_line(int x1, int y1, int x2, int y2, const Color &color = default_color_fg);
+    void draw_line(int x1, int y1, int x2, int y2,
+		   const Color &color = UI::Colors::default_color_fg);
     void draw_text(int x, int y, const std::string &text,
-		   const Color &color_fg = default_color_fg,
-		   const Color &color_bg = default_color_bg);
+		   const Color &color_fg = UI::Colors::default_color_fg,
+		   const Color &color_bg = UI::Colors::default_color_bg);
     void draw_text_hw(int x, int y, const std::string &text,
-		      const Color &color_fg = default_color_fg,
-		      const Color &color_bg = default_color_bg);
+		      const Color &color_fg = UI::Colors::default_color_fg,
+		      const Color &color_bg = UI::Colors::default_color_bg);
     void draw_text_small(int x, int y, const std::string &text,
-		      const Color &color_fg = default_color_fg,
-		      const Color &color_bg = default_color_bg);
+		      const Color &color_fg = UI::Colors::default_color_fg,
+		      const Color &color_bg = UI::Colors::default_color_bg);
 
     void draw_modal_input(int x, int y, const std::string &label, const std::string &value);
 

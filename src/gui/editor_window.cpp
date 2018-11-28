@@ -8,9 +8,6 @@
 #include <GL/gl.h>
 #include <SDL_opengl.h>
 
-const Color EditorWindow::default_color_fg = {255, 255, 255, 255};
-const Color EditorWindow::default_color_bg = {0, 0, 0, 0};
-
 EditorWindow::Button::Button(const std::string &label_,
 			     std::function<void(void)>callback_,
 			     int x_, int y_,
@@ -217,7 +214,7 @@ void EditorWindow::draw_modal_input(int x, int y,
     int h_total = 2 * (UI::Text::char_height * 2) + UI::Text::row_gap + edge_pad * 2;
     int w_total = (2 * std::max(label.size(), value.size() + 1) * (UI::Text::char_width * 2)
 		   + edge_pad * 2);
-    draw_rect(x, y, w_total, h_total, default_color_bg, true);
+    draw_rect(x, y, w_total, h_total, UI::Colors::default_color_bg, true);
     draw_rect(x, y, w_total, h_total);
     draw_text(x + edge_pad, y + edge_pad, label);
     draw_text(x + edge_pad, y + edge_pad + UI::Text::char_height * 2 + UI::Text::row_gap,

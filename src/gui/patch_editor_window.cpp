@@ -12,14 +12,15 @@
 
 using boost::irange;
 using boost::adaptors::reversed;
+using namespace UI;
 
 int PatchEditorWindow::EditorModule::hovered_input_impl(int px, int py) {
     // N params + 1 trigger field + stereo toggle + shape selection
-    int top = y + UI::Text::char_height * 2 + UI::Text::row_gap;
+    int top = y + Text::char_height * 2 + Text::row_gap;
     int hovered = -1;
     if (px >= x && px < x + width &&
 	py >= top) {
-	hovered = (py - top) / (UI::Text::char_height + UI::Text::row_gap);
+	hovered = (py - top) / (Text::char_height + Text::row_gap);
     }
     return hovered;
 }
@@ -49,11 +50,11 @@ int PatchEditorWindow::EditorModule::hovered_input(int px, int py) {
 
 void PatchEditorWindow::EditorModule::adjust_size() {
     height = ((2 + 3 + module.params.size()) *
-	      (UI::Text::char_height + UI::Text::row_gap) +
+	      (Text::char_height + Text::row_gap) +
 	      2); // pad (todo: to ui constants)
     int widest = PatchEditorWindow::MODULE_SIZE;
     for (auto &val : string_values) {
-	int w = UI::Text::char_width * (5 + val.size()) + 2;
+	int w = Text::char_width * (5 + val.size()) + 2;
 	if (w > widest) {
 	    widest = w;
 	}
@@ -140,7 +141,7 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
 		10, (Button::default_height + 8) * 6),
       next_page("Next",
 		std::bind(&PatchEditorWindow::change_page, this, 1),
-		10 + UI::Text::char_width * 2 * 5, (Button::default_height + 8) * 6)
+		10 + Text::char_width * 2 * 5, (Button::default_height + 8) * 6)
 {
     // master mix out, immovable && indestructible
     auto master_out = EditorModule();
@@ -175,10 +176,10 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
 				    std::bind(&PatchEditorWindow::del_module, this),
 				    10 + (162 + 8) * 2, 10, 162));
     for (int i : irange(0, num_tracks)) {
-	int tx = 20 + UI::Text::char_width * 11 * (i % 4);
+	int tx = 20 + Text::char_width * 11 * (i % 4);
 	int ty = 10 + (Button::default_height + 8) * (3 + i / 4);
 	instr_textboxes.push_back(TextBox(tx, ty, 2, "0"));
-	instr_textboxes.push_back(TextBox(tx + UI::Text::char_width * 5, ty, 2, "0"));
+	instr_textboxes.push_back(TextBox(tx + Text::char_width * 5, ty, 2, "0"));
     }
 
     for (auto &button : action_buttons) {
@@ -401,13 +402,13 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 				     int idx) {
     draw_rect(module.x, module.y,
 	      module.width, module.height,
-	      default_color_bg, true);
+	      Colors::default_color_bg, true);
     draw_rect(module.x, module.y,
 	      module.width, module.height, edge_color);
     draw_text_hw(module.x + 1, module.y + 1, module.label);
     std::stringstream idx_str;
     idx_str << idx;
-    draw_text_small(module.x + module.width - UI::Text::char_width * idx_str.str().size() - 3,
+    draw_text_small(module.x + module.width - Text::char_width * idx_str.str().size() - 3,
 		    module.y + 1,
 		    idx_str.str());
 
@@ -423,48 +424,48 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 		  4, 4);
     }
 
-    int y_off = 2 * UI::Text::char_height + UI::Text::row_gap;
+    int y_off = 2 * Text::char_height + Text::row_gap;
     draw_text_small(module.x + 1, module.y + y_off, module.string_trigger);
-    y_off += UI::Text::char_height + UI::Text::row_gap;
+    y_off += Text::char_height + Text::row_gap;
 
     if (!module.is_master_out) {
 	if (module.module.type == Module::ModuleType::TYPE_OSC) {
 	    // Stereo checkbox
 	    draw_text_small(module.x, module.y + y_off,
 			    "ster");
-	    int cbox_x = module.x + 1 + UI::Text::char_width * 5;
+	    int cbox_x = module.x + 1 + Text::char_width * 5;
 	    int cbox_y = module.y + y_off;
-	    int cbox_w = UI::Text::char_width * 2;
-	    int cbox_h = UI::Text::char_height;
+	    int cbox_w = Text::char_width * 2;
+	    int cbox_h = Text::char_height;
 	    draw_rect(cbox_x, cbox_y, cbox_w, cbox_h);
 	    if (module.module.stereo) {
 		draw_line(cbox_x + 2, cbox_y + 2, cbox_x + cbox_w - 2, cbox_y + cbox_h - 2);
 		draw_line(cbox_x + 2, cbox_y + cbox_h - 2, cbox_x + cbox_w - 2, cbox_y + 2);
 	    }
-	    y_off += (UI::Text::char_height + UI::Text::row_gap);
+	    y_off += (Text::char_height + Text::row_gap);
 
 	    // Shape selector
 	    draw_text_small(module.x, module.y + y_off,
 			    module.module.osc_shape_names.at(module.module.osc_shape));
-	    y_off += (UI::Text::char_height + UI::Text::row_gap);
+	    y_off += (Text::char_height + Text::row_gap);
 	}
 	// Parameters w/ inputs
 	for (auto i : irange(0u, module.module.params.size())) {
 	    // Parameter connection point
-	    draw_line(module.x, module.y + y_off + UI::Text::char_height / 2,
-		      module.x - 16, module.y + y_off + UI::Text::char_height / 2);
-	    draw_rect(module.x - 16 - 2, module.y + y_off + UI::Text::char_height / 2 - 2,
+	    draw_line(module.x, module.y + y_off + Text::char_height / 2,
+		      module.x - 16, module.y + y_off + Text::char_height / 2);
+	    draw_rect(module.x - 16 - 2, module.y + y_off + Text::char_height / 2 - 2,
 		      4, 4);
 	    // Parameter label & value
 	    draw_text_small(module.x + 1, module.y + y_off,
 			    module_param_labels[module.module.type][i]);
-	    draw_text_small(module.x + 1 + UI::Text::char_width * 5,
+	    draw_text_small(module.x + 1 + Text::char_width * 5,
 			    module.y + y_off, module.string_values[i]);
 	    if (is_hovered && hovered_param == static_cast<int>(i)) {
 		draw_rect(module.x + 1, module.y + y_off,
-			  module.width, UI::Text::char_height);
+			  module.width, Text::char_height);
 	    }
-	    y_off += (UI::Text::char_height + UI::Text::row_gap);
+	    y_off += (Text::char_height + Text::row_gap);
 	}
     }
 }
@@ -489,9 +490,9 @@ void PatchEditorWindow::update() {
 			  module2.y - 16);
 	    } else {
 		int skip = (module2.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
-		int y_off = UI::Text::char_height / 2 +
+		int y_off = Text::char_height / 2 +
 		    ((module.module.out_param + skip) *
-		     (UI::Text::char_height + UI::Text::row_gap));
+		     (Text::char_height + Text::row_gap));
 		draw_line(module.x + module.width / 2,
 			  module.y + module.height + 16,
 			  module2.x - 16,
@@ -514,14 +515,14 @@ void PatchEditorWindow::update() {
 	    } else if (idx == hovered_module) {
 		draw_module(e, hovered_color, is_hovered, i);
 	    } else {
-		draw_module(e, default_color_fg, is_hovered, i);
+		draw_module(e, Colors::default_color_fg, is_hovered, i);
 	    }
 	}
     }
 
     std::stringstream page_str;
     page_str << shown_page;
-    draw_text(width - UI::Text::char_width * 8,
+    draw_text(width - Text::char_width * 8,
 	      (Button::default_height + 8) * 6,
 	      page_str.str());
 

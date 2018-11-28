@@ -6,6 +6,7 @@
 #include <boost/range/irange.hpp>
 
 using boost::irange;
+using namespace UI;
 
 TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *renderer,
 			     TTF_Font *text_font, ModalPromptInterface &prompt_input_,
@@ -15,30 +16,30 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
       cursor_area(TrackerWindow::CURSOR_AREA_TRACKER),
       order_shrink("-",
 		   std::bind(&TrackerWindow::order_adjust, this, -1),
-		   850, (UI::Text::font_size * 2)),
+		   850, (Text::font_size * 2)),
       order_grow("+",
 		 std::bind(&TrackerWindow::order_adjust, this, 1),
-		 850 + 70, (UI::Text::font_size * 2)),
-      tempo_textbox(UI::Text::char_width * 4 * 9,
-		    UI::Text::font_size * 2 * 6,
+		 850 + 70, (Text::font_size * 2)),
+      tempo_textbox(Text::char_width * 4 * 9,
+		    Text::font_size * 2 * 6,
 		    6,
 		    tostr(data.ticklen),
 		    std::bind(&TrackerWindow::set_tempo_cb, this,
 			      std::placeholders::_1)),
-      pattern_rows_textbox(UI::Text::char_width * 4 * 9,
-			   UI::Text::font_size * 2 * 7,
+      pattern_rows_textbox(Text::char_width * 4 * 9,
+			   Text::font_size * 2 * 7,
 			   6,
 			   tostr(data.num_rows),
 			   std::bind(&TrackerWindow::set_pattern_rows_cb, this,
 				     std::placeholders::_1)),
-      master_hb_coeff_textbox(UI::Text::char_width * 4 * 9,
-			      UI::Text::font_size * 2 * 9,
+      master_hb_coeff_textbox(Text::char_width * 4 * 9,
+			      Text::font_size * 2 * 9,
 			      6,
 			      tostr(data.master_hb_coeff),
 			      std::bind(&TrackerWindow::set_master_hb_coeff_cb, this,
 					std::placeholders::_1)),
-      master_hb_mix_textbox(UI::Text::char_width * 4 * 9,
-			    UI::Text::font_size * 2 * 10,
+      master_hb_mix_textbox(Text::char_width * 4 * 9,
+			    Text::font_size * 2 * 10,
 			    6,
 			    tostr(data.master_hb_coeff),
 			    std::bind(&TrackerWindow::set_master_hb_mix_cb, this,
@@ -359,8 +360,8 @@ void TrackerWindow::key_up(const SDL_Keysym &sym) {
 
 void TrackerWindow::update() {
     const int TRACKER_START_Y = (768 -
-				 ((UI::Text::font_size * 2) + UI::Tracker::row_pad) *
-				 (UI::Tracker::visible_rows - UI::Tracker::row_pad));
+				 ((Text::font_size * 2) + Tracker::row_pad) *
+				 (Tracker::visible_rows - Tracker::row_pad));
 
     const std::vector<std::string> notes = {"C-", "C#", "D-", "D#",
 					    "E-", "F-", "F#", "G-",
@@ -375,22 +376,22 @@ void TrackerWindow::update() {
     bool hw_effects;
     bool hw_notes;
     if (data.num_tracks <= 4) {
-	track_width = UI::Text::char_width * 2 * 14;
+	track_width = Text::char_width * 2 * 14;
 	hw_effects = false;
 	hw_notes = false;
     } else if (data.num_tracks <= 6) {
-	track_width = UI::Text::char_width * 2 * 10;
+	track_width = Text::char_width * 2 * 10;
 	hw_effects = true;
 	hw_notes = false;
     } else {
-	track_width = UI::Text::char_width * 2 * 7;
+	track_width = Text::char_width * 2 * 7;
 	hw_effects = true;
 	hw_notes = true;
     }
 
     auto &patt = data.patterns[current_pattern];
-    for (int disp_row = 0; disp_row < UI::Tracker::visible_rows; ++disp_row) {
-	int row_idx = cursor_row - (UI::Tracker::visible_rows / 2) + disp_row;
+    for (int disp_row = 0; disp_row < Tracker::visible_rows; ++disp_row) {
+	int row_idx = cursor_row - (Tracker::visible_rows / 2) + disp_row;
 	if (row_idx < 0 || static_cast<size_t>(row_idx) >= data.num_rows) {
 	    continue;
 	}
@@ -400,29 +401,29 @@ void TrackerWindow::update() {
 	lineno.fill('0');
 	lineno << std::hex << row_idx;
 
-	draw_text_hw(4, TRACKER_START_Y + UI::Tracker::row_pad + ((UI::Text::font_size * 2) + UI::Tracker::row_pad) * disp_row,
+	draw_text_hw(4, TRACKER_START_Y + Tracker::row_pad + ((Text::font_size * 2) + Tracker::row_pad) * disp_row,
 		     lineno.str(), Color(160, 160, 160, 255));
 
 	int track_idx = 0;
 	for (auto &track : patt.tracks) {
 	    Pattern::Cell &cell = track.cells[row_idx];
 
-	    int start_x = (40 + UI::Tracker::track_pad +
-			   (track_width + UI::Tracker::track_pad) * track_idx);
-	    int start_y = TRACKER_START_Y + UI::Tracker::row_pad + ((UI::Text::font_size * 2) + UI::Tracker::row_pad) * disp_row;
+	    int start_x = (40 + Tracker::track_pad +
+			   (track_width + Tracker::track_pad) * track_idx);
+	    int start_y = TRACKER_START_Y + Tracker::row_pad + ((Text::font_size * 2) + Tracker::row_pad) * disp_row;
 
 	    Color cell_color;
 	    if (mute_flags[track_idx]) {
-		cell_color = colors.tracker_bg;
+		cell_color = Colors::tracker_bg;
 	    } else if (row_idx == cursor_row) {
-		cell_color = colors.cursor_row;
+		cell_color = Colors::tracker_cursor_row;
 	    } else if (playing_pattern == current_pattern &&
 		       playing_row == static_cast<unsigned int>(row_idx)) {
-		cell_color = colors.play_cursor;
+		cell_color = Colors::tracker_play_cursor;
 	    } else if (row_idx % 2 == 0) {
-		cell_color = colors.row_2;
+		cell_color = Colors::tracker_row_hilight1;
 	    } else {
-		cell_color = colors.tracker_bg;
+		cell_color = Colors::tracker_bg;
 	    }
 
 	    std::stringstream r_text;
@@ -434,9 +435,11 @@ void TrackerWindow::update() {
 		r_text << notes[cell.note] << cell.octave;
 	    }
 	    if (hw_notes) {
-	      draw_text_hw(start_x, start_y, r_text.str(), default_color_fg, cell_color);
+	      draw_text_hw(start_x, start_y, r_text.str(),
+			   Colors::default_color_fg, cell_color);
 	    } else {
-		draw_text(start_x, start_y, r_text.str(), default_color_fg, cell_color);
+		draw_text(start_x, start_y, r_text.str(),
+			  Colors::default_color_fg, cell_color);
 	    }
 
 	    r_text.str(std::string());
@@ -450,14 +453,16 @@ void TrackerWindow::update() {
 	    {
 		int x;
 		if (hw_notes) {
-		    x = start_x + UI::Text::char_width * 2 * 4;
+		    x = start_x + Text::char_width * 2 * 4;
 		} else {
-		    x = start_x + UI::Text::char_width * 2 * 7;
+		    x = start_x + Text::char_width * 2 * 7;
 		}
 		if (hw_effects) {
-		    draw_text_hw(x, start_y, r_text.str(), default_color_fg, cell_color);
+		    draw_text_hw(x, start_y, r_text.str(),
+				 Colors::default_color_fg, cell_color);
 		} else {
-		    draw_text(x, start_y, r_text.str(), default_color_fg, cell_color);
+		    draw_text(x, start_y, r_text.str(),
+			      Colors::default_color_fg, cell_color);
 		}
 	    }
 
@@ -467,12 +472,12 @@ void TrackerWindow::update() {
 		instr_num_text << cell.instrument;
 		int x;
 		if (hw_notes) {
-		    x = start_x + UI::Text::char_width * 2 * 3;
+		    x = start_x + Text::char_width * 2 * 3;
 		} else {
-		    x = start_x + UI::Text::char_width * 4 * 3;
+		    x = start_x + Text::char_width * 4 * 3;
 		}
 		draw_text_hw(x, start_y, instr_num_text.str(),
-			     colors.instrument_num, cell_color);
+			     Colors::tracker_instrument_num, cell_color);
 	    }
 
 	    // cursor
@@ -483,26 +488,26 @@ void TrackerWindow::update() {
 		if (cursor_x % 4 == 0) {
 		    cursor_rect.x = start_x;
 		    if (hw_notes) {
-			cursor_rect.w = (UI::Text::char_width * 2) * 3;
+			cursor_rect.w = (Text::char_width * 2) * 3;
 		    } else {
-			cursor_rect.w = (UI::Text::char_width * 4) * 3;
+			cursor_rect.w = (Text::char_width * 4) * 3;
 		    }
 		} else {
 		    if (hw_effects) {
 			if (hw_notes) {
-			    cursor_rect.x = start_x + (UI::Text::char_width * 2) * (3 + cursor_x % 4);
+			    cursor_rect.x = start_x + (Text::char_width * 2) * (3 + cursor_x % 4);
 			} else {
-			    cursor_rect.x = start_x + (UI::Text::char_width * 2) * (6 + cursor_x % 4);
+			    cursor_rect.x = start_x + (Text::char_width * 2) * (6 + cursor_x % 4);
 			}
-			cursor_rect.w = (UI::Text::char_width * 2);
+			cursor_rect.w = (Text::char_width * 2);
 		    } else {
 			// TODO: ignore hw_notes here for now, at the moment can't happen
-			cursor_rect.x = start_x + (UI::Text::char_width * 4) * (3 + cursor_x % 4);
-			cursor_rect.w = (UI::Text::char_width * 4);
+			cursor_rect.x = start_x + (Text::char_width * 4) * (3 + cursor_x % 4);
+			cursor_rect.w = (Text::char_width * 4);
 		    }
 		}
 		cursor_rect.y = start_y;
-		cursor_rect.h = (UI::Text::font_size * 2);
+		cursor_rect.h = (Text::font_size * 2);
 		draw_rect(cursor_rect);
 	    }
 
@@ -518,7 +523,7 @@ void TrackerWindow::update() {
 
     std::stringstream o_text;
     o_text << "Order  :";
-    draw_text(0, (UI::Text::font_size * 2), o_text.str());
+    draw_text(0, (Text::font_size * 2), o_text.str());
     int order_idx = 0;
     for (auto n : data.order) {
 	o_text.clear();
@@ -529,10 +534,10 @@ void TrackerWindow::update() {
 	o_text << (n + 1);
 	if ((order_idx + order_idx / 18) % 2 == 0) {
 	    draw_text_hw(order_x(order_idx), order_y(order_idx), o_text.str(),
-			 default_color_fg, colors.order_bg_1);
+			 Colors::default_color_fg, Colors::tracker_order_bg_1);
 	} else {
 	    draw_text_hw(order_x(order_idx), order_y(order_idx), o_text.str(),
-			 default_color_fg, colors.order_bg_2);
+			 Colors::default_color_fg, Colors::tracker_order_bg_2);
 	}
 	++order_idx;
     }
@@ -540,39 +545,39 @@ void TrackerWindow::update() {
     // Order cursor
     if (cursor_area == CURSOR_AREA_ORDER) {
 	draw_rect(order_x(order_cursor_pos), order_y(order_cursor_pos),
-		  UI::Text::char_width * 4, UI::Text::font_size * 2);
+		  Text::char_width * 4, Text::font_size * 2);
     }
 
     std::stringstream oct_text;
     oct_text << "Octave   " << current_octave;
-    draw_text(0, (UI::Text::font_size * 2) * 4, oct_text.str());
+    draw_text(0, (Text::font_size * 2) * 4, oct_text.str());
 
     std::stringstream instr_text;
     instr_text << "Instr    " << current_instrument;
-    draw_text(0, (UI::Text::font_size * 2) * 5, instr_text.str());
+    draw_text(0, (Text::font_size * 2) * 5, instr_text.str());
 
     std::stringstream tempo_text;
     tempo_text << "Tempo   ";
-    draw_text(0, (UI::Text::font_size * 2) * 6, tempo_text.str());
+    draw_text(0, (Text::font_size * 2) * 6, tempo_text.str());
 
     std::stringstream rows_text;
     rows_text << "Rows    ";
-    draw_text(0, (UI::Text::font_size * 2) * 7, rows_text.str());
+    draw_text(0, (Text::font_size * 2) * 7, rows_text.str());
 
     std::stringstream hb_width_text;
     hb_width_text << "HB width";
-    draw_text(0, (UI::Text::font_size * 2) * 9, hb_width_text.str());
+    draw_text(0, (Text::font_size * 2) * 9, hb_width_text.str());
 
     std::stringstream hb_gain_text;
     hb_gain_text << "HB gain";
-    draw_text(0, (UI::Text::font_size * 2) * 10, hb_gain_text.str());
+    draw_text(0, (Text::font_size * 2) * 10, hb_gain_text.str());
 
     // Song length
     long long samples = data.order.size() * data.num_rows * data.ticklen;
     long long seconds = samples / (44100 * 2);
     char buf[10];
     snprintf(buf, 10, "%02lld:%02lld", seconds / 60, seconds % 60);
-    draw_text(width - UI::Text::char_width * 5 * 4, 0, buf);
+    draw_text(width - Text::char_width * 5 * 4, 0, buf);
 
     data.unlock();
     EditorWindow::update();
@@ -818,11 +823,11 @@ void TrackerWindow::order_del() {
 }
 
 int TrackerWindow::order_x(int order_idx) {
-    return (UI::Text::char_width * 4) / 2 * (16 + (order_idx % 18) * 2);
+    return (Text::char_width * 4) / 2 * (16 + (order_idx % 18) * 2);
 }
 
 int TrackerWindow::order_y(int order_idx) {
-    return (UI::Text::font_size * 2) * (1 + order_idx / 18);
+    return (Text::font_size * 2) * (1 + order_idx / 18);
 }
 
 void TrackerWindow::set_tempo_cb(const std::string &value) {
