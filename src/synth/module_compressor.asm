@@ -2,11 +2,13 @@
 ;;; independent channels (TODO: stereo link would be nice too)
 ;;; 
 
+;;; esi
 %define COMP_VAL_IN        4
 %define COMP_VAL_THRESHOLD 8
 %define COMP_VAL_ATTACK    12
 %define COMP_VAL_RELEASE   16
 
+;;; ebp
 %define COMP_STATE_GAIN    0
 	
 module_compressor:
@@ -30,8 +32,7 @@ module_compressor:
 	jnc .do_release		; jmp if threshold > abs(output)
 
 	;; if output is above threshold, apply comp. attack (should be < 1.0 to reduce gain)
-	fld dword [esi + COMP_VAL_ATTACK]
-	fmulp
+	fmul dword [esi + COMP_VAL_ATTACK]
 	jmp .skip_release
 
 .do_release:
@@ -40,10 +41,10 @@ module_compressor:
 	fcomip st1		; set cf if gain > 1
 	jc .skip_release
 
-	fld dword [esi + COMP_VAL_RELEASE]
-	faddp
+	fadd dword [esi + COMP_VAL_RELEASE]
 
 .skip_release:
+
 	;; st0: updated gain, st1: output signal
 	fstp dword [ebp + COMP_STATE_GAIN] ; store new gain (if not > 1)
 
