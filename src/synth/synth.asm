@@ -514,8 +514,8 @@ element_loop:
 
 	fmul dword [stereo_mod]
 
-.mono_only:
 	add ebp, STATE_BYTES_PER_CHANNEL
+.mono_only:
 .ch_left:
 	fstp dword [bss_stereo_factor]
 
