@@ -5,11 +5,13 @@
 ;;;
 ;;; TODO: N stage support
 
+;;; esi
 %define ENV_PARAM_ATT      4  ; linear attack add
 %define ENV_PARAM_SWITCH   8 ; level for A -> D switch (or how about just doing at 1?)
 %define ENV_PARAM_DECAY    12 ; multiplier for exp decay
 %define ENV_PARAM_STAGE    16 ; env stage A: 0, D: 1
 
+;;; ebp
 %define ENV_STATE_LEVEL    0  ; current level
 
 %define ENV_STAGE_ATTACK   1
