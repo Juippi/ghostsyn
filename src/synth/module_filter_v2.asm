@@ -10,6 +10,8 @@
 ;;; filter constants
 fc1:
 	dd 3.296875		; TODO: close to PI, good enough?
+pw:
+	dd 1.5			; filter peak width
 
 module_filter_v2:
 	pusha
@@ -17,9 +19,13 @@ module_filter_v2:
 	;; Scale feedback with cutoff for increased stability & more usable sound
 	fld dword [esi + FLT_PARAM_CUTOFF]
 	fabs			; safety
-	fld st0			; st0 == st1 == cutoff
-	fmul dword [esi + FLT_PARAM_FB]
-	fmul dword [fc1]
+
+	fld dword [esi + FLT_PARAM_FB]
+
+	;; fld st0			; st0 == st1 == cutoff
+	;; fmul dword [esi + FLT_PARAM_FB]
+	;; fldl2e
+	;; fmulp
 	;; st0: scaled feedback, st1: flt cutoff
 
 	;; add input to feedback
@@ -39,7 +45,11 @@ module_filter_v2:
 	faddp
 	fst dword [ebp + FLT1_STATE_Y]
 
-	add ebp, 4
+	add ebp, 4		; advance ebp to 2nd filter state
+	;; cutoff of 2nd filter
+	fld st1
+	fmul dword [pw]
+	fstp st2
 
 	;; 2nd LP filter
 	fmul st1
