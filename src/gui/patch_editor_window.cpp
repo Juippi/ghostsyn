@@ -196,6 +196,12 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
     for ([[maybe_unused]] int i : irange(0, PatchEditorWindow::NUM_INSTRUMENTS)) {
 	instrument_triggers.push_back(std::pair<int, int>(0, 0));
     }
+
+    for (int idx : irange(0, 4)) {
+	int y = 350 + idx * 100;
+	bus_outputs.push_back(BusConnPoint(10, y, idx));
+	bus_inputs.push_back(BusConnPoint(width - 16 - 10, y, idx));
+    }
 }
 
 PatchEditorWindow::~PatchEditorWindow() {
@@ -302,6 +308,32 @@ void PatchEditorWindow::mouse_move(int x, int y, bool inside) {
 		hovered_module = -1;
 		changed = true;
 	    }
+
+	    int new_hovered_bus_input = -1;
+	    for (int i : irange(0, static_cast<int>(bus_inputs.size()))) {
+		auto &point = bus_inputs[i];
+		if (point.is_inside(x, y)) {
+		    new_hovered_bus_input = i;
+		    break;
+		}
+	    }
+	    if (hovered_bus_input != new_hovered_bus_input) {
+		hovered_bus_input = new_hovered_bus_input;
+		changed = true;
+	    }
+
+	    int new_hovered_bus_output = -1;
+	    for (int i : irange(0, static_cast<int>(bus_outputs.size()))) {
+		auto &point = bus_outputs[i];
+		if (point.is_inside(x, y)) {
+		    new_hovered_bus_output = i;
+		    break;
+		}
+	    }
+	    if (hovered_bus_output != new_hovered_bus_output) {
+		hovered_bus_output = new_hovered_bus_output;
+		changed = true;
+	    }
 	}
     }
     EditorWindow::mouse_move(x, y, inside);
@@ -316,12 +348,15 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 		!modules[hovered_module].is_master_out) {
 		selected_module = hovered_module;
 		changed = true;
-	    }
-	    if (selected_module == hovered_module &&
-		!modules[selected_module].is_master_out) {
-		dragging = true;
-		drag_offset_x = modules[selected_module].x - x;
-		drag_offset_y = modules[selected_module].y - y;
+		if (selected_module == hovered_module &&
+		    !modules[selected_module].is_master_out) {
+		    dragging = true;
+		    drag_offset_x = modules[selected_module].x - x;
+		    drag_offset_y = modules[selected_module].y - y;
+		}
+	    } else if (hovered_bus_output >= 0) {
+		// TODO
+		changed = true;
 	    }
 	    break;
 	case SDL_BUTTON_RIGHT:
@@ -344,6 +379,9 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 			modules[selected_module].module.out_module = -1;
 			modules[selected_module].module.out_param = -1;
 		    }
+		    changed = true;
+		} else if (hovered_bus_input >= 0) {
+		    // TODO
 		    changed = true;
 		}
 	    }
@@ -472,6 +510,20 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
     }
 }
 
+void PatchEditorWindow::draw_bus_conn(const BusConnPoint &point, bool is_hovered) {
+    Color c;
+    if (is_hovered) {
+	c = Colors::module_hovered_color;
+    } else {
+	c = Colors::default_color_fg;
+    }
+    draw_rect(point.x, point.y, 16, 16, c);
+    draw_line(point.x + 3, point.y + 3,
+	      point.x + point.width - 4, point.y + point.height / 2, c);
+    draw_line(point.x + 3, point.y + point.height - 3,
+	      point.x + point.width - 4, point.y + point.height / 2, c);
+}
+
 void PatchEditorWindow::update() {
     draw_rect(2, 2, width - 4, height - 4);
 
@@ -503,6 +555,14 @@ void PatchEditorWindow::update() {
 	}
     }
 
+    // Bus connection points
+    for (int i : irange(0, static_cast<int>(bus_inputs.size()))) {
+	draw_bus_conn(bus_inputs[i], i == hovered_bus_input);
+    }
+    for (int i : irange(0, static_cast<int>(bus_outputs.size()))) {
+	draw_bus_conn(bus_outputs[i], i == hovered_bus_output);
+    }
+
     // Modules
     for (size_t i : irange(0u, modules.size())) {
 	auto &module = modules[i];
@@ -513,9 +573,9 @@ void PatchEditorWindow::update() {
 	    const EditorModule &e = module;
 	    bool is_hovered = (hovered_module == static_cast<int>(i));
 	    if (idx == selected_module) {
-		draw_module(e, selected_color, is_hovered, i);
+		draw_module(e, Colors::module_selected_color, is_hovered, i);
 	    } else if (idx == hovered_module) {
-		draw_module(e, hovered_color, is_hovered, i);
+		draw_module(e, Colors::module_hovered_color, is_hovered, i);
 	    } else {
 		draw_module(e, Colors::default_color_fg, is_hovered, i);
 	    }

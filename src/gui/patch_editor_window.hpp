@@ -50,11 +50,32 @@ class PatchEditorWindow : public EditorWindow {
 
 	Module module;
 
+	// Index of bus input module output is connected to, or -1 if connected
+	// directly to another module.
+	bool out_bus = -1;
+
 	virtual bool is_inside(int x, int y);
 	virtual int hovered_param(int x, int y);
 	virtual int hovered_input(int x, int y);
 
 	void adjust_size();
+    };
+
+    // Bus connections. The connections appear on all instrument editor pages,
+    // and can be used to make intra-page connections between modules: module 1 output
+    // to bus N input, and bus N output to module 2 input.
+    class BusConnPoint {
+    public:
+	int x;
+	int y;
+	int idx;
+	static constexpr int height = 16;
+	static constexpr int width = 16;
+	BusConnPoint(int x_, int y_, int idx_) : x(x_), y(y_), idx(idx_) {}
+	bool is_inside(int cx, int cy) {
+	    return (cx >= x && cy >= y &&
+		    cx <= (x + width) && cy <= (y + height));
+	}
     };
 
     // Labels for different module types
@@ -83,6 +104,9 @@ class PatchEditorWindow : public EditorWindow {
     std::vector<TextBox> instr_textboxes;
     std::vector<Button> action_buttons;
 
+    std::vector<BusConnPoint> bus_inputs;
+    std::vector<BusConnPoint> bus_outputs;
+
     // Primary and secondary instruments for each track
     std::vector<std::pair<int, int>> track_instruments;
 
@@ -94,8 +118,11 @@ class PatchEditorWindow : public EditorWindow {
     int hovered_module = -1;
     // Index of hovered module float parameter, or -1 if none hovered
     int hovered_param = -1;
-    // INdex of hovered non-float-param input, or -1 if none hovered
+    // Index of hovered non-float-param input, or -1 if none hovered
     int hovered_input = -1;
+    // Indexes of hovered bus input/output
+    int hovered_bus_input = -1;
+    int hovered_bus_output = -1;
     // Index of selected module (left click), or -1 if none selected
     int selected_module = -1;
 
@@ -108,10 +135,6 @@ class PatchEditorWindow : public EditorWindow {
     int shown_page = 0;
     Button prev_page;
     Button next_page;
-
-    const Color hovered_color = {0, 127, 127, 127};
-    const Color selected_color = {127, 63, 0, 127};
-    const Color hovered_cpoint_color = {127, 100, 100, 127};
 
     // Clamp module position to editor area
     void clamp_module_pos(EditorModule &module);
@@ -143,6 +166,7 @@ class PatchEditorWindow : public EditorWindow {
 
     void draw_module(const EditorModule &module, const Color &edge_color, bool is_hovered,
 		      int idx);
+    void draw_bus_conn(const BusConnPoint &conn, bool is_hovered);
     void update() override;
 
     // Button actions
