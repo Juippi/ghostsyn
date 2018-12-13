@@ -222,12 +222,23 @@ void PatchEditorWindow::from_json(Json::Value &json_) {
 	module.module.from_json(module_json["module"]);
 	module.string_trigger = module_json["string_trigger"].asString();
 	module.trigger_instrument = module_json["trigger_instrument"].asInt();
+	module.out_bus = module_json.get("out_bus", -1).asInt();
 	for (auto &string_value : module_json["string_values"]) {
 	    module.string_values.push_back(string_value.asString());
 	}
 	size_t button_idx = 0;
 	for (auto &instrument : module_json["track_instruments"]) {
-	    instr_textboxes[button_idx++].value = instrument.asString();
+	    if (button_idx < instr_textboxes.size()) {
+		instr_textboxes[button_idx++].value = instrument.asString();
+	    }
+	}
+	size_t bus_idx = 0;
+	for (auto &bus : module_json.get("bus_output_conns", Json::Value(Json::arrayValue))) {
+	    if (bus_idx < bus_outputs.size()) {
+		bus_outputs[bus_idx].out_module = bus["out_module"].asInt();
+		bus_outputs[bus_idx].out_param = bus["out_param"].asInt();
+		++bus_idx;
+	    }
 	}
 	clamp_module_pos(module);
 	module.adjust_size();
@@ -253,6 +264,7 @@ Json::Value PatchEditorWindow::as_json() {
 	module_json["module"] = module.module.as_json();
 	module_json["string_trigger"] = module.string_trigger;
 	module_json["trigger_instrument"] = module.trigger_instrument;
+	module_json["out_bus"] = module.out_bus;
 	Json::Value string_values_json(Json::arrayValue);
 	for (auto &string_value : module.string_values) {
 	    string_values_json.append(string_value);
@@ -262,6 +274,14 @@ Json::Value PatchEditorWindow::as_json() {
 	for (auto &textbox : instr_textboxes) {
 	    track_instruments_json.append(textbox.value);
 	}
+	Json::Value bus_output_conns(Json::arrayValue);
+	for (auto &bus : bus_outputs) {
+	    Json::Value conn(Json::objectValue);
+	    conn["out_module"] = bus.out_module;
+	    conn["out_param"] = bus.out_param;
+	    bus_output_conns.append(conn);
+	}
+	module_json["bus_output_conns"] = bus_output_conns;
 	module_json["track_instruments"] = track_instruments_json;
 	modules_json.append(module_json);
     }
