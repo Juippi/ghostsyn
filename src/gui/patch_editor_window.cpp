@@ -347,6 +347,7 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 		selected_module != hovered_module &&
 		!modules[hovered_module].is_master_out) {
 		selected_module = hovered_module;
+		selected_bus_output = -1;
 		changed = true;
 		if (selected_module == hovered_module &&
 		    !modules[selected_module].is_master_out) {
@@ -355,7 +356,8 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 		    drag_offset_y = modules[selected_module].y - y;
 		}
 	    } else if (hovered_bus_output >= 0) {
-		// TODO
+		selected_bus_output = hovered_bus_output;
+		selected_module = -1;
 		changed = true;
 	    }
 	    break;
@@ -364,11 +366,12 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 		selected_module != hovered_module) {
 
 		if (modules[hovered_module].is_master_out) {
+		    modules[selected_module].out_bus = -1;
 		    modules[selected_module].module.out_module = hovered_module;
 		    modules[selected_module].module.out_param = 0;
 		    changed = true;
 
-		} else if (hovered_param >= 0) {
+		} if (hovered_param >= 0) {
 		    if (modules[selected_module].module.out_module != hovered_module) {
 			// std::cerr << "connect: elem " << selected_module
 			//	  << " -> " << hovered_module << ":" << hovered_param << std::endl;
@@ -380,10 +383,19 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 			modules[selected_module].module.out_param = -1;
 		    }
 		    changed = true;
-		} else if (hovered_bus_input >= 0) {
-		    // TODO
-		    changed = true;
 		}
+	    } else if (selected_bus_output >= 0 && hovered_module >= 0 && hovered_param >= 0) {
+		std::cerr << "connect: bus output " << selected_bus_output
+			  << " to module " << hovered_module << " param " << hovered_param << std::endl;
+		bus_outputs[selected_bus_output].out_module = hovered_module;
+		bus_outputs[selected_bus_output].out_param = hovered_param + 1;
+		changed = true;
+	    } else if (hovered_bus_input >= 0 && selected_module >= 0) {
+		std::cerr << "connect: module " << selected_module
+			  << " to bus " << hovered_bus_input << std::endl;
+		modules[selected_module].module.out_module = -1;
+		modules[selected_module].out_bus = hovered_bus_input;
+		changed = true;
 	    }
 	    break;
 	case SDL_BUTTON_MIDDLE:
@@ -510,9 +522,11 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
     }
 }
 
-void PatchEditorWindow::draw_bus_conn(const BusConnPoint &point, bool is_hovered) {
+void PatchEditorWindow::draw_bus_conn(const BusConnPoint &point, bool is_hovered, bool is_selected) {
     Color c;
-    if (is_hovered) {
+    if (is_selected) {
+	c = Colors::module_selected_color;
+    } else if (is_hovered) {
 	c = Colors::module_hovered_color;
     } else {
 	c = Colors::default_color_fg;
@@ -552,6 +566,27 @@ void PatchEditorWindow::update() {
 			  module2.x - 16,
 			  module2.y + y_off);
 	    }
+	} else if (module.out_bus >= 0) {
+	    // Connections from modules to bus inputs
+	    auto &bus = bus_inputs[module.out_bus];
+	    draw_line(module.x + module.width / 2,
+		      module.y + module.height + 16,
+		      bus.x + bus.width / 2,
+		      bus.y + bus.height / 2);
+	}
+    }
+    // Connections from bus outputs to modules
+    for (auto &bus : bus_outputs) {
+	if (bus.out_module >= 0 && bus.out_param >= 0) {
+	    auto &module = modules[bus.out_module];
+	    int skip = (module.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
+	    int y_off = Text::char_height / 2 +
+		((bus.out_param + skip) *
+		 (Text::char_height + Text::row_gap));
+	    draw_line(bus.x + bus.width / 2,
+		      bus.y + bus.height / 2,
+		      module.x - 16,
+		      module.y + y_off);
 	}
     }
 
@@ -560,7 +595,7 @@ void PatchEditorWindow::update() {
 	draw_bus_conn(bus_inputs[i], i == hovered_bus_input);
     }
     for (int i : irange(0, static_cast<int>(bus_outputs.size()))) {
-	draw_bus_conn(bus_outputs[i], i == hovered_bus_output);
+	draw_bus_conn(bus_outputs[i], i == hovered_bus_output, i == selected_bus_output);
     }
 
     // Modules
@@ -620,6 +655,12 @@ void PatchEditorWindow::del_module() {
 	for (auto &module : modules) {
 	    if (module.module.out_module >= selected_module) {
 		--module.module.out_module;
+	    }
+	}
+	for (auto &bus : bus_outputs) {
+	    if (bus.out_module >= selected_module) {
+		// if deleted module was idx 0, this sets out_module correctly to -1
+		--bus.out_module;
 	    }
 	}
 	hovered_module = -1;

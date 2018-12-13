@@ -52,7 +52,7 @@ class PatchEditorWindow : public EditorWindow {
 
 	// Index of bus input module output is connected to, or -1 if connected
 	// directly to another module.
-	bool out_bus = -1;
+	int out_bus = -1;
 
 	virtual bool is_inside(int x, int y);
 	virtual int hovered_param(int x, int y);
@@ -69,6 +69,9 @@ class PatchEditorWindow : public EditorWindow {
 	int x;
 	int y;
 	int idx;
+	// out_module, out_param relevant for bus outputs only
+	int out_module = -1;
+	int out_param = -1;
 	static constexpr int height = 16;
 	static constexpr int width = 16;
 	BusConnPoint(int x_, int y_, int idx_) : x(x_), y(y_), idx(idx_) {}
@@ -120,9 +123,10 @@ class PatchEditorWindow : public EditorWindow {
     int hovered_param = -1;
     // Index of hovered non-float-param input, or -1 if none hovered
     int hovered_input = -1;
-    // Indexes of hovered bus input/output
+    // Indexes of hovered bus input/output & selected output
     int hovered_bus_input = -1;
     int hovered_bus_output = -1;
+    int selected_bus_output = -1;
     // Index of selected module (left click), or -1 if none selected
     int selected_module = -1;
 
@@ -166,7 +170,7 @@ class PatchEditorWindow : public EditorWindow {
 
     void draw_module(const EditorModule &module, const Color &edge_color, bool is_hovered,
 		      int idx);
-    void draw_bus_conn(const BusConnPoint &conn, bool is_hovered);
+    void draw_bus_conn(const BusConnPoint &conn, bool is_hovered, bool is_selected = false);
     void update() override;
 
     // Button actions
