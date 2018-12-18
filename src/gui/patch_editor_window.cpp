@@ -754,7 +754,13 @@ void PatchEditorWindow::update_data(TrackerData &data) {
 	// std::cerr << "bfs dump current: " << current << std::endl;
 
 	for (size_t i : irange(0u, modules.size())) {
-	    if (modules[i].module.out_module == current) {
+	    auto &module = modules[i];
+	    if (module.module.out_module == current) { // Direct connection
+		bfs_stack.push(i);
+	    } else if (module.out_bus >= 0 &&
+		       bus_outputs[module.out_bus].out_module == current) { // Connection via bus
+		std::cerr << "module " << i << " connected to " << current
+			  << " via bus " << module.out_bus << std::endl;
 		bfs_stack.push(i);
 	    }
 	}
@@ -764,6 +770,13 @@ void PatchEditorWindow::update_data(TrackerData &data) {
 	    //	      << modules[current].label << ")" << std::endl;
 	    dump_modules.push_back(modules[current].module);
 	    dump_order.push_back(current);
+	    // If module output is connected to something via bus, transform to direct connection
+	    if (modules[current].out_bus >= 0) {
+		auto &latest = *(dump_modules.rbegin());
+		auto &bus = bus_outputs[modules[current].out_bus];
+		latest.out_module = bus.out_module;
+		latest.out_param = bus.out_param;
+	    }
 	}
     }
 
