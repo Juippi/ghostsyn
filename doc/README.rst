@@ -228,12 +228,23 @@ for each module, the number of the instrument triggering that particular
 module can be set by editing the value of the module's trigger input field.
 One instrument can trigger up to 4 modules.
 
+Modules can also be connected to each other via bus inputs at the right side
+of the module area, and outputs at the left. This can also be used to connect
+modules accross module editor pages.
+
+In future, the need for pages & buses could be reduced by just making the
+window larger/resizable.
+
 Assigning instruments to tracks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each track can trigger two different instruments, primary and alternate.
 Notes with 0 in instrument column trigger the primary instrument, and notes
 with 1 the alternate instrument for the track.
+
+Each track runs an independent copy of the whole synth for both of its
+instruments, so it's not possible to e.g. feed multiple instruments into the
+same filter or dynamic compressor. This may change later.
 
 Module types
 ------------
