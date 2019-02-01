@@ -29,7 +29,7 @@ PatchEditorWindow::EditorModule::~EditorModule() {
 }
 
 int PatchEditorWindow::EditorModule::hovered_param(int px, int py) {
-    int no_inputs = (module.type == Module::ModuleType::TYPE_OSC ? 3 : 1);
+    int no_inputs = (module.type == Module::ModuleType::TYPE_OSC ? 3 : 2);
     int param = hovered_input_impl(px, py) - no_inputs;
     if (param >= 0 && param < static_cast<int>(string_values.size())) {
 	return param;
@@ -39,7 +39,7 @@ int PatchEditorWindow::EditorModule::hovered_param(int px, int py) {
 }
 
 int PatchEditorWindow::EditorModule::hovered_input(int px, int py) {
-    int no_inputs = (module.type == Module::ModuleType::TYPE_OSC ? 3 : 1);
+    int no_inputs = (module.type == Module::ModuleType::TYPE_OSC ? 3 : 2);
     int input = hovered_input_impl(px, py);
     if (input >= 0 && input < no_inputs) {
 	return input;
@@ -434,9 +434,15 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 					      val,
 					      std::bind(&EditorWindow::str_assign, std::ref(val), std::placeholders::_1));
 		} else if (hovered_input == 1) {
-		    he.module.stereo = !he.module.stereo;
-		    changed = true;
-		} else if (hovered_input == 2) {
+                    if (he.module.type == Module::ModuleType::TYPE_OSC) {
+                        he.module.stereo = !he.module.stereo;
+                        changed = true;
+                    } else if (he.module.type == Module::TYPE_FILTER) {
+                        he.module.filter_type =
+                            static_cast<Module::FilterType>((he.module.filter_type + 1) % Module::FilterType::FLT_NUM_TYPES);
+                        changed = true;
+                    }
+		} else if (hovered_input == 2 && he.module.type == Module::ModuleType::TYPE_OSC) {
 		    he.module.osc_shape =
 			static_cast<Module::OscShape>((he.module.osc_shape + 1) % Module::OscShape::OSC_NUM_SHAPES);
 		    changed = true;
@@ -519,7 +525,12 @@ void PatchEditorWindow::draw_module(const EditorModule &module,
 	    draw_text_small(module.x, module.y + y_off,
 			    module.module.osc_shape_names.at(module.module.osc_shape));
 	    y_off += (Text::char_height + Text::row_gap);
-	}
+	} else if (module.module.type == Module::ModuleType::TYPE_FILTER) {
+	    // Filter type selector
+	    draw_text_small(module.x, module.y + y_off,
+			    module.module.filter_type_names.at(module.module.filter_type));
+	    y_off += (Text::char_height + Text::row_gap);
+        }
 	// Parameters w/ inputs
 	for (auto i : irange(0u, module.module.params.size())) {
 	    // Parameter connection point
@@ -577,7 +588,7 @@ void PatchEditorWindow::update() {
 			  module2.x + module2.width / 2,
 			  module2.y - 16);
 	    } else {
-		int skip = (module2.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
+		int skip = (module2.module.type == Module::ModuleType::TYPE_OSC ? 4 : 3);
 		int y_off = Text::char_height / 2 +
 		    ((module.module.out_param + skip) *
 		     (Text::char_height + Text::row_gap));

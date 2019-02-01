@@ -147,6 +147,8 @@ void Module::from_json(Json::Value &json) {
     comment = json["_comment"].asString();
     if (type == TYPE_OSC) {
 	osc_shape = osc_name_shapes.at(json["shape"].asString());
+    } else if (type == TYPE_FILTER) {
+        filter_type = filter_name_types.at(json.get("filter_type", "lp").asString());
     }
     Json::Value params_json = json["params"];
 
@@ -209,6 +211,8 @@ Json::Value Module::as_json() {
     json["_comment"] = comment;
     if (type == TYPE_OSC) {
 	json["shape"] = osc_shape_names[osc_shape];
+    } else if (type == TYPE_FILTER) {
+        json["filter_type"] = filter_type_names[filter_type];
     }
 
     Json::Value params_json(Json::objectValue);
@@ -240,7 +244,11 @@ std::vector<Section *> Module::bin() {
     if (stereo) {
 	tmp[0] |= 0x80;
     }
-    tmp[2] = osc_shape_flags[osc_shape];
+    if (type == TYPE_OSC) {
+        tmp[2] = osc_shape_flags[osc_shape];
+    } else if (type == TYPE_FILTER) {
+        tmp[2] = filter_type_flags[filter_type];
+    }
     tmp[3] = out_offset;
     res.push_back(new BinSection("modules", tmp));
 

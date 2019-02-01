@@ -71,6 +71,22 @@ public:
 	{OSC_NOISE, 0x08}
     };
 
+    // filter type, for filter only
+    typedef enum {FLT_LP, FLT_HP, FLT_NUM_TYPES} FilterType;
+    FilterType filter_type = FLT_LP;
+    std::map<FilterType, const std::string> filter_type_names = {
+        {FLT_LP, "lp"},
+        {FLT_HP, "hp"}
+    };
+    std::map<const std::string, FilterType> filter_name_types = {
+        {"lp", FLT_LP},
+        {"hp", FLT_HP}
+    };
+    std::map<FilterType, int> filter_type_flags = {
+        {FLT_LP, 0x00},
+        {FLT_HP, 0x01}
+    };
+
     typedef enum {OP_SET, OP_ADD, OP_MULT} OutOp;
     OutOp out_op = OP_SET;
     std::map<OutOp, std::string> op_names = {
