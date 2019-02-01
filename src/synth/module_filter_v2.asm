@@ -34,6 +34,8 @@ module_filter_v2:
 	fsubp			; flt1_out - flt2_out
 	fmulp			; *= feedback
 	fsin			; waveshape feedback signal
+
+        ;; TODO: flip feedback here to get lp & notch?
 	fadd dword [esi + FLT_PARAM_INPUT]
 	;; st0: (input + feedback), st1: flt cutoff
 
@@ -59,9 +61,16 @@ module_filter_v2:
 	faddp
 	fst dword [ebp + FLT1_STATE_Y]
 
-	;; TODO: LP/HP switch
+	;; get rid of cutoff in st1, leave 2nd flt output to st0
 	fxch st0, st1
 	fstp st0
+
+        ;; if HP flag set, turn filter into hp (& notch) by subtracting original input
+        mov eax, dword [esi]
+        test eax, FLT_FLAG_HP
+        jz .no_hp
+        fsub dword [esi + FLT_PARAM_INPUT]
+.no_hp:
 
 	popa
 	ret

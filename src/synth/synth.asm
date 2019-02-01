@@ -49,6 +49,8 @@ oct_semitones:
 
 	%define OSC_FLAG_STEREO  0x80
 
+        %define FLT_FLAG_HP      0x10000
+
 	;; module types (byte 0 of module type word)
 	%define MODULE_TYPE_OSC        0x00
 	%define MODULE_TYPE_FILTER     0x01
