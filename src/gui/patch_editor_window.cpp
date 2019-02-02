@@ -610,14 +610,16 @@ void PatchEditorWindow::update() {
     for (auto &bus : bus_outputs) {
 	if (bus.out_module >= 0 && bus.out_param >= 0) {
 	    auto &module = modules[bus.out_module];
-	    int skip = (module.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
-	    int y_off = Text::char_height / 2 +
-		((bus.out_param + skip) *
-		 (Text::char_height + Text::row_gap));
-	    draw_line(bus.x + bus.width / 2,
-		      bus.y + bus.height / 2,
-		      module.x - 16,
-		      module.y + y_off);
+            if (module.page == shown_page) {
+                int skip = (module.module.type == Module::ModuleType::TYPE_OSC ? 4 : 2);
+                int y_off = Text::char_height / 2 +
+                    ((bus.out_param + skip) *
+                     (Text::char_height + Text::row_gap));
+                draw_line(bus.x + bus.width / 2,
+                          bus.y + bus.height / 2,
+                          module.x - 16,
+                          module.y + y_off);
+            }
 	}
     }
 
