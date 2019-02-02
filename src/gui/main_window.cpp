@@ -50,6 +50,13 @@ void MainWindow::save_song() {
 	    def_str << "%define ENABLE_" << n << std::endl;
 	}
     }
+    // Does HP filter need to be enabled?
+    if (std::find_if(data.modules.begin(), data.modules.end(),
+                     [] (auto &m) -> bool { return (m.type == Module::ModuleType::TYPE_FILTER &&
+                                                    m.filter_type == Module::FilterType::FLT_HP); })
+        != data.modules.end()) {
+        def_str << "%define ENABLE_FILTER_MODE_HP" << std::endl;
+    }
 
     song_json["_defines"] = def_str.str();
 
