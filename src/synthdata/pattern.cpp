@@ -95,11 +95,11 @@ Json::Value Pattern::as_json() {
     return pattern_json;
 }
 
-std::vector<uint8_t> Pattern::bin(unsigned int output_num_rows) {
+std::vector<uint8_t> Pattern::bin(unsigned int output_num_rows, unsigned int output_num_tracks) {
     std::vector<uint8_t> bin;
 
     for (size_t r = 0; r < std::min(num_rows, output_num_rows); ++r) {
-	for (size_t t = 0; t < num_tracks; ++t) {
+	for (size_t t = 0; t < std::min(num_tracks, output_num_tracks); ++t) {
 	    auto &cell = tracks[t].cells[r];
 	    uint8_t val = 0;
 	    if (cell.note != -1) {
@@ -112,7 +112,7 @@ std::vector<uint8_t> Pattern::bin(unsigned int output_num_rows) {
 	}
     }
 
-    bin.resize(output_num_rows * num_tracks);
+    bin.resize(output_num_rows * output_num_tracks);
     return bin;
 }
 

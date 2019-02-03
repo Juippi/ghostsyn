@@ -42,6 +42,6 @@ public:
     void from_json(const Json::Value &json);
     Json::Value as_json();
     // Convert num_rows rows of pattern data to binary representation
-    std::vector<uint8_t> bin(unsigned int num_rows);
+    std::vector<uint8_t> bin(unsigned int num_rows, unsigned int num_tracks);
     void resize(unsigned int num_rows);
 };

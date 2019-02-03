@@ -39,6 +39,7 @@ protected:
 
     TextBox tempo_textbox;
     TextBox pattern_rows_textbox;
+    TextBox pattern_tracks_textbox;
     TextBox master_hb_coeff_textbox;
     TextBox master_hb_mix_textbox;
 
@@ -69,6 +70,7 @@ protected:
 
     void set_tempo_cb(const std::string &value);
     void set_pattern_rows_cb(const std::string &value);
+    void set_pattern_tracks_cb(const std::string &value);
     void set_master_hb_coeff_cb(const std::string &value);
     void set_master_hb_mix_cb(const std::string &value);
 

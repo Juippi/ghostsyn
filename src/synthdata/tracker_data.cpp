@@ -103,7 +103,7 @@ void TrackerData::from_json(Json::Value &json) {
 std::vector<uint8_t> TrackerData::patterns_bin() {
     std::vector<uint8_t> res;
     for (auto &pattern : patterns) {
-	auto pattern_bin = pattern.bin(num_rows);
+	auto pattern_bin = pattern.bin(num_rows, num_tracks);
 	res.insert(res.end(), pattern_bin.begin(), pattern_bin.end());
     }
     return res;
@@ -152,7 +152,7 @@ std::vector<Section *> TrackerData::bin() {
 	std::stringstream header;
 	header << "pattern " << (idx++);
 	res.push_back(new CommentSection(header.str()));
-	res.push_back(new BinSection("patterns", pattern.bin(num_rows)));
+	res.push_back(new BinSection("patterns", pattern.bin(num_rows, num_tracks)));
     }
 
     BinSection *sect_order = new BinSection("order", "order");;
@@ -203,7 +203,7 @@ std::vector<Section *> TrackerData::bin() {
 }
 
 void TrackerData::new_pattern() {
-    patterns.push_back(Pattern(num_tracks, max_num_rows));
+    patterns.push_back(Pattern(max_num_tracks, max_num_rows));
 }
 
 bool TrackerData::del_pattern(size_t pos) {

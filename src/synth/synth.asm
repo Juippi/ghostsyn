@@ -31,7 +31,7 @@ oct_semitones:
         %define MODULE_DATA_BYTES MODULE_DATA_SIZE * 4
         %define MODULE_WORK_BYTES 65536 * 4
 
-        %define NUM_TRACKS 8
+        %define NUM_TRACKS 8    ; TODO
 
 %ifdef TRACKER_EMBED
         ;; include empty data for tracker use
@@ -485,7 +485,7 @@ notrig:				; no trigger note
 %ifdef TRACKER_EMBED
         push ebx
         mov ebx, [num_rows]
-        imul ebx, NUM_TRACKS
+        imul ebx, [num_tracks]
         cmp eax, ebx
         pop ebx
 %else
@@ -744,7 +744,7 @@ synth_update:
 
         ;; start playback from this pattern row
         mov esi, [eax + 52]
-        imul esi, NUM_TRACKS
+        imul esi, [num_tracks]
         mov [bss_pattern_pos], esi
 
         ;; master high boost filter params

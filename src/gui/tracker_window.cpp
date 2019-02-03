@@ -32,6 +32,12 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
 			   tostr(data.num_rows),
 			   std::bind(&TrackerWindow::set_pattern_rows_cb, this,
 				     std::placeholders::_1)),
+      pattern_tracks_textbox(Text::char_width * 4 * 9,
+			   Text::font_size * 2 * 8,
+			   6,
+			   tostr(data.num_tracks),
+			   std::bind(&TrackerWindow::set_pattern_tracks_cb, this,
+				     std::placeholders::_1)),
       master_hb_coeff_textbox(Text::char_width * 4 * 9,
 			      Text::font_size * 2 * 9,
 			      6,
@@ -49,6 +55,7 @@ TrackerWindow::TrackerWindow(int x, int y, int width, int height, SDL_Renderer *
     register_(order_grow);
     register_(tempo_textbox);
     register_(pattern_rows_textbox);
+    register_(pattern_tracks_textbox);
     register_(master_hb_coeff_textbox);
     register_(master_hb_mix_textbox);
 }
@@ -404,8 +411,8 @@ void TrackerWindow::update() {
 	draw_text_hw(4, TRACKER_START_Y + Tracker::row_pad + ((Text::font_size * 2) + Tracker::row_pad) * disp_row,
 		     lineno.str(), Color(160, 160, 160, 255));
 
-	int track_idx = 0;
-	for (auto &track : patt.tracks) {
+	for (auto track_idx : irange(0, static_cast<int>(data.num_tracks))) {
+            auto &track = patt.tracks[track_idx];
 	    Pattern::Cell &cell = track.cells[row_idx];
 
 	    int start_x = (40 + Tracker::track_pad +
@@ -563,6 +570,10 @@ void TrackerWindow::update() {
     std::stringstream rows_text;
     rows_text << "Rows    ";
     draw_text(0, (Text::font_size * 2) * 7, rows_text.str());
+
+    std::stringstream tracks_text;
+    tracks_text << "Tracks  ";
+    draw_text(0, (Text::font_size * 2) * 8, tracks_text.str());
 
     std::stringstream hb_width_text;
     hb_width_text << "HB width";
@@ -846,6 +857,16 @@ void TrackerWindow::set_pattern_rows_cb(const std::string &value) {
     data.lock();
     if (val > 0 && val <= data.max_num_rows) {
 	data.num_rows = val;
+    }
+    data.unlock();
+    cursor_move(0, 0);
+}
+
+void TrackerWindow::set_pattern_tracks_cb(const std::string &value) {
+    int val = atoi_pos<int>(value);
+    data.lock();
+    if (val > 0 && val <= data.max_num_tracks) {
+	data.num_tracks = val;
     }
     data.unlock();
     cursor_move(0, 0);

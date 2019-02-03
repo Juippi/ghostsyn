@@ -123,7 +123,7 @@ void Audio::update_synth(int order_offset, int start_row) {
 		     section_modules.data(), section_modules.size(),
 		     section_triggers.data(), section_triggers.size(),
 		     module_count, ticklen,
-		     data.num_rows, 8 /*num_trakcs*/,  start_row,
+		     data.num_rows, data.num_tracks,  start_row,
 		     1.0 - data.master_hb_coeff, data.master_hb_coeff, data.master_hb_mix,
 		     data.module_skip_flags.data(), data.module_skip_flags.size());
     } else {
