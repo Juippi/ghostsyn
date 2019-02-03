@@ -31,8 +31,6 @@ oct_semitones:
         %define MODULE_DATA_BYTES MODULE_DATA_SIZE * 4
         %define MODULE_WORK_BYTES 65536 * 4
 
-        %define NUM_TRACKS 8    ; TODO
-
 %ifdef TRACKER_EMBED
         ;; include empty data for tracker use
         %include "tracker_workspace.asm"
