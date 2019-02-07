@@ -29,7 +29,15 @@ PatchEditorWindow::EditorModule::~EditorModule() {
 }
 
 int PatchEditorWindow::EditorModule::hovered_param(int px, int py) {
-    int no_inputs = (module.type == Module::ModuleType::TYPE_OSC ? 3 : 2);
+    const static std::map<Module::ModuleType, int> module_no_inputs_map = {
+        {Module::ModuleType::TYPE_OSC, 3},
+        {Module::ModuleType::TYPE_FILTER, 2},
+        {Module::ModuleType::TYPE_ENV, 1},
+        {Module::ModuleType::TYPE_COMP, 1},
+        {Module::ModuleType::TYPE_REVERB, 1},
+        {Module::ModuleType::TYPE_CHORUS, 1}
+    };
+    const int no_inputs = module_no_inputs_map.at(module.type);
     int param = hovered_input_impl(px, py) - no_inputs;
     if (param >= 0 && param < static_cast<int>(string_values.size())) {
 	return param;
