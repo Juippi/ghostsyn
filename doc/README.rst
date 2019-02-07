@@ -65,8 +65,9 @@ Features
 
 * Visual graph editor for building instruments
 * Tracker-like UI for building songs
-* Oscillator, envelope and resonant low-pass filter modules, enabling
+* Oscillator, envelope and 2-mode filter modules, enabling
   sound generation that emulates a subtractive analogue synthesizer
+* Reverb/delay and dynamic compressor modules
 * Modulation options that among other things also make rudimentary FM synthesis possible
 * Tooling for generating a single AT&T syntax 32 bit x86 assembly source file
   with synth code and data, which is compatible with Dnload_.
@@ -287,6 +288,9 @@ peak. Tweaking its parameters requires some care, as the range between
 pleasant and unstable feedback (resonance) values can be quite narrow, but
 it can occasionally sound quite nice. It's also offers some variation to the
 often seen 'classic' state variable design.
+
+Filter also supports high-pass mode where original input signal is subtracter
+from LP output, creating a HP filter with an extra notch.
 
 Parameters
 ''''''''''
