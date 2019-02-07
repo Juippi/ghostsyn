@@ -6,7 +6,6 @@
 
 %define MAX_NUM_ROWS 128 ; reserve space for max. this many rows per pattern
 %define MAX_NUM_TRACKS 8 ; reserve space for max. this many tracks in a pattern
-%define NUM_TRACKS MAX_NUM_TRACKS
 
 ;;; tracker build has all module types and features always enabled
 %define ENABLE_OSCILLATOR
@@ -18,6 +17,7 @@
 %define ENABLE_REVERB
 %define ENABLE_SILENCE
 
+%define NUM_TRACKS MAX_NUM_TRACKS
 %define NUM_MODULES TRACKER_MAX_MODULES
 
 ;;; length of single tracker tick in audio frames

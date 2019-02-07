@@ -183,7 +183,7 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
     action_buttons.push_back(Button("Del module",
 				    std::bind(&PatchEditorWindow::del_module, this),
 				    10 + (162 + 8) * 2, 10, 162));
-    for (int i : irange(0, num_tracks)) {
+    for (int i : irange(0, TrackerData::max_num_tracks)) {
 	int tx = 20 + Text::char_width * 11 * (i % 4);
 	int ty = 10 + (Button::default_height + 8) * (3 + i / 4);
 	instr_textboxes.push_back(TextBox(tx, ty, 2, "0"));
@@ -197,7 +197,6 @@ PatchEditorWindow::PatchEditorWindow(int x, int y, int width, int height, int nu
 	register_(textbox);
     }
 
-    instrument_triggers.resize(num_tracks);
     for ([[maybe_unused]] int i : irange(0, num_tracks)) {
 	track_instruments.push_back(std::pair<int, int>(0, 0));
     }
@@ -852,6 +851,7 @@ void PatchEditorWindow::update_data(TrackerData &data) {
 	if (all_outs.find(out_key.str()) == all_outs.end()) {
 	    all_outs.insert(out_key.str());
 	    // first module outputting to this destination, needs to overwrite prev. value
+            // TODO: check also bus output targets here, or OP_SET may overwrite bus output!
 	    m.out_op = Module::OP_SET;
 	    // std::cerr << " op: set" << std::endl;
 	} else {
@@ -869,7 +869,7 @@ void PatchEditorWindow::update_data(TrackerData &data) {
     std::cerr << std::endl;
 
     // Dump primary & secondary instrument trigger config for all tracks
-    for (size_t track_idx : irange(0u, track_instruments.size())) {
+    for (size_t track_idx : irange(0u, data.num_tracks)) {
 	auto &track_instrument = track_instruments[track_idx];
 
 	// std::cerr << "* track "  << track_idx << " instruments: "
