@@ -702,12 +702,16 @@ void PatchEditorWindow::del_module() {
 	!modules[selected_module].is_master_out) {
 	modules.erase(modules.begin() + selected_module);
 	for (auto &module : modules) {
-	    if (module.module.out_module >= selected_module) {
+            if (module.module.out_module == selected_module) {
+                module.module.out_module = -1;
+            } else if (module.module.out_module >= selected_module) {
 		--module.module.out_module;
 	    }
 	}
 	for (auto &bus : bus_outputs) {
-	    if (bus.out_module >= selected_module) {
+            if (bus.out_module == selected_module) {
+                bus.out_module = -1;
+            } else if (bus.out_module >= selected_module) {
 		// if deleted module was idx 0, this sets out_module correctly to -1
 		--bus.out_module;
 	    }
