@@ -371,7 +371,6 @@ void PatchEditorWindow::mouse_click(int button_idx, int x, int y, bool inside) {
 	switch (button_idx) {
 	case SDL_BUTTON_LEFT:
 	    if (hovered_module >= 0 &&
-		selected_module != hovered_module &&
 		!modules[hovered_module].is_master_out) {
 		selected_module = hovered_module;
 		selected_bus_output = -1;
