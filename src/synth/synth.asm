@@ -363,49 +363,6 @@ tracks_loop:
         pop ecx			; get track no for trigger control
         push ecx		; keep stored for loop end
 
-%if 0		  ; compact triggering
-        ;;
-        ;; trigger primary or alternate instrument for track
-        ;;
-        pusha
-
-        neg ecx
-        add ecx, 4
-        imul ecx, 8
-
-        test al, 0x80
-        jz no_alt_instr
-        add ecx, 4
-no_alt_instr:
-
-        ;; trigger point value is just a byte offset from start of source elemnt to start of dest.
-        add ecx, trigger_points
-        ;; ecx == &trigger_points[track_idx]
-        mov ecx, [ecx]
-
-        add esi, ecx
-
-        cmp al, 1
-        je noteoff
-
-        ;; we trigger an envelope element, and set pitch of
-        ;; immediately following osc element
-        mov dword [esi + ENV_PARAM_STAGE], ENV_STAGE_ATTACK
-        fstp dword [esi + MODULE_DATA_BYTES + OSC_PARAM_ADD]
-
-        ;;
-        ;; TEST: only set one osc for testing
-        fstp dword [esi + OSC_PARAM_ADD]
-
-        jmp no_noteoff
-noteoff:
-        ;; switch envelope to release phase
-        mov dword [esi + ENV_PARAM_STAGE], 2
-no_noteoff:
-
-        popa
-
-%else	      ; complex triggering
         ;;
         ;; flexible triggering: trigger up to 4 osc/env modules
         ;;
@@ -472,7 +429,7 @@ trig_done:
         popa
 
         fstp st0		; remove note pitch from fpu stack
-%endif
+
 notrig:				; no trigger note
         ;;
         ;; end of triggering
