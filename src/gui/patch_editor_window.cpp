@@ -83,6 +83,7 @@ void PatchEditorWindow::clamp_module_pos(EditorModule &module) {
 }
 
 bool PatchEditorWindow::has_connection_cycle() {
+    // TODO: should check bus connections here too
     bool has_cycle = false;
     for (size_t start : irange(0u, modules.size())) {
 	int idx = start;
