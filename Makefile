@@ -1,6 +1,7 @@
 INTRODIR := $(CURDIR)/../cassini
 FREEBSD_VM := fb32
 INTRODIR_VM := ~/git/adarkar_wastes/src/
+COMPILE_SONG ?= src/gui/testsong.json
 
 all: build
 
@@ -19,7 +20,7 @@ clean:
 
 .PHONY: compile
 compile: build
-	src/tools/synthtool -c src/gui/testsong.json compile/song.asm compile/song_params.h
+	src/tools/synthtool -c $(COMPILE_SONG) compile/song.asm compile/song_params.h
 	cp -v src/synth/*.asm compile/
 	make -C compile test
 	make -C compile rendertest
