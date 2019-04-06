@@ -12,11 +12,15 @@ global_volume:
 end_fade:
         dd 0.99998
 
+%define ENABLE_MASTER_HIGHBOOST
+
+%ifdef ENABLE_MASTER_HIGHBOOST
 ;;; state for master high boost filter
 ;;; TODO: move to bss
 master_hb_state:
         dd 0.0
         dd 0.0
+%endif // ENABLE_MASTER_HIGHBOOST
 
 ;;; other constants
 stereo_mod:
@@ -611,6 +615,7 @@ was_master_out:
 
         fmul dword [global_volume]
 
+%ifdef ENABLE_MASTER_HIGHBOOST
         ;; high freq boost
         push edx
 
@@ -632,8 +637,8 @@ was_master_out:
         faddp
 
         pop edx
-
         ;; end high freq boost
+%endif // ENABLE_MASTER_HIGHBOOST
 
         fstp dword [edi]	; store synth output
         add edi, 4
