@@ -360,6 +360,16 @@ Parameters
 
 TODO
 
+Master stage
+------------
+
+There's an experimental high boost effect just before master out, controlled
+by 'width' and 'gain' paraneters. Width (0.0-1.0) determines the width of the
+HF band to boost; for technical reasons, higher values actually mean a narrowed
+band. Values between 0.7 and 0.9 seem to produce reasonable results. Gain sets
+the amount of boost. Gain values below 0 can also be used to attenuate the high
+band instead.
+
 TODO
 ----
 
