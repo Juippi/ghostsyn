@@ -5,14 +5,16 @@
 #include <iostream>
 #include <algorithm>
 
+// #define DEBUG
+
 std::vector<uint8_t> find_section(const std::vector<Section *> sections, const std::string &type) {
     std::vector<uint8_t> data;
     for (auto *section: sections) {
-	BinSection *bs = dynamic_cast<BinSection *>(section);
-	if (bs && bs->type == type) {
-	    std::cerr << "insert " << type << " " << bs->data.size() << std::endl;
-	    data.insert(data.end(), bs->data.begin(), bs->data.end());
-	}
+        BinSection *bs = dynamic_cast<BinSection *>(section);
+        if (bs && bs->type == type) {
+            std::cerr << "insert " << type << " " << bs->data.size() << std::endl;
+            data.insert(data.end(), bs->data.begin(), bs->data.end());
+        }
     }
     return data;
 }
@@ -37,7 +39,7 @@ Audio::Audio(TrackerData &data_, PlaystateCBInterface &playstate_cb_)
     spec.userdata = this;
     device = SDL_OpenAudioDevice(NULL, 0, &spec, &got, 0);
     if (device == 0) {
-	std::cerr << SDL_GetError() << std::endl;
+        std::cerr << SDL_GetError() << std::endl;
     }
     SDL_PauseAudioDevice(device, 0);
 }
@@ -50,39 +52,42 @@ void Audio::callback(Uint8 *stream, int len) {
     memset(stream, 0, len);
     size_t frames = len / (sizeof(float) * 2);
     float *float_stream = reinterpret_cast<float *>(stream);
-    struct playback_state playstate;
+    struct playback_state playstate = {0, 0};
 
     if (synth_running) {
-	// synth requires sample count, not stereo frame count
+        // synth requires sample count, not stereo frame count
 #ifdef DEBUG
-	std::cerr << "call synth, samples = " << frames * 2 << std::endl;
+        std::cerr << "call synth, samples = " << frames * 2 << std::endl;
 #endif
-	{
-	    std::unique_lock<std::mutex> lock(synth_mutex);
-	    synth(float_stream, frames * 2, &playstate);
-	}
-	playstate_cb.report_playstate(playstate.current_pattern,
-				      playstate.current_row);
+        {
+            memset(float_stream, 0, (frames * 2 * sizeof(float)));
+            std::unique_lock<std::mutex> lock(synth_mutex);
+            synth(float_stream, frames * 2, &playstate);
+        }
+        playstate_cb.report_playstate(playstate.current_pattern,
+                                      playstate.current_row);
 #ifdef DEBUG
-	for (size_t i = 0; i < std::min(frames * 2, 16u); ++i) {
-	    std::cerr << float_stream[i] << " ";
-	}
-	std::cerr << std::endl;
+        for (size_t i = 0; i < std::min(frames * 2, 16u); ++i) {
+            std::cerr << float_stream[i] << " ";
+        }
+        std::cerr << std::endl;
 #endif
     }
 }
 
 void Audio::update_synth(int order_offset, int start_row) {
     data.lock();
-    std::vector<Section *> bin = data.bin();
+    std::vector<Section *> bin = data.bin(false);
     int module_count = static_cast<int>(data.modules.size());
     int ticklen = static_cast<int>(data.ticklen);
+    int const_bytes = data.num_constants * 4;
     data.unlock();
 
     auto section_patterns = find_section(bin, "patterns");
     auto section_order = find_section(bin, "order");
     auto section_modules = find_section(bin, "modules");
     auto section_triggers = find_section(bin, "trigger_points");
+    auto section_workbuf = find_section(bin, "workbuf");
 
     std::cerr << "update synth! " << std::endl;
 
@@ -90,44 +95,54 @@ void Audio::update_synth(int order_offset, int start_row) {
     print_words(section_patterns.data(), section_patterns.size(), 16);
 
     if (state == STATE_PLAYING_PATTERN) {
-	// instead of song, just loop a single pattern
-	section_order.resize(32);
-	for (auto &v : section_order) {
-	    v = play_single_pattern_no;
-	}
+        // instead of song, just loop a single pattern
+        section_order.resize(32);
+        for (auto &v : section_order) {
+            v = play_single_pattern_no;
+        }
     }
 
     // playing song from the middle is accomplished by rotating the order
     if (order_offset > 0 && order_offset < static_cast<int>(section_order.size())) {
-	std::rotate(section_order.begin(), section_order.begin() + order_offset, section_order.end());
+        std::rotate(section_order.begin(), section_order.begin() + order_offset, section_order.end());
     }
 
     std::cerr << "order (" << section_order.size() << " bytes):" << std::endl;
     print_words(section_order.data(), section_order.size(), 16);
 
     std::cerr << "modules (" << data.modules.size() << ", "
-	      << section_modules.size() << " bytes):" << std::endl;
-    print_words(section_modules.data(), section_modules.size(), 20);
+              << section_modules.size() << " bytes):" << std::endl;
+    print_words(section_modules.data(), section_modules.size(), 6);
 
     std::cerr << "triggers (" << section_triggers.size() << " bytes):" << std::endl;
     print_words(section_triggers.data(), section_triggers.size(), 16);
 
-    std::cerr << "skip flags:" << std::endl;
-    print_words(data.module_skip_flags.data(), data.module_skip_flags.size(), 16);
+    std::cerr << "workbuf (" << section_workbuf.size() << " bytes):" << std::endl;
+    print_words(section_workbuf.data(), section_workbuf.size(), 16);
+
+    // std::cerr << "skip flags:" << std::endl;
+    // print_words(data.module_skip_flags.data(), data.module_skip_flags.size(), 16);
+
+    std::cerr << "module_count " << module_count << std::endl
+              << "ticklen " << ticklen << std::endl
+              << "num_rows " << data.num_rows << std::endl
+              << "num_tracks " << data.num_tracks << std::endl
+              << "const_bytes " << const_bytes << std::endl;
 
     if (section_patterns.size() > 0 && section_order.size() > 0 &&
-	section_modules.size() > 0 && section_triggers.size() > 0) {
-	std::unique_lock<std::mutex> lock(synth_mutex);
-	synth_update(section_patterns.data(), section_patterns.size(),
-		     section_order.data(), section_order.size(),
-		     section_modules.data(), section_modules.size(),
-		     section_triggers.data(), section_triggers.size(),
-		     module_count, ticklen,
-		     data.num_rows, data.num_tracks,  start_row,
-		     1.0 - data.master_hb_coeff, data.master_hb_coeff, data.master_hb_mix,
-		     data.module_skip_flags.data(), data.module_skip_flags.size());
+        section_modules.size() > 0 && section_triggers.size() > 0) {
+        std::unique_lock<std::mutex> lock(synth_mutex);
+        synth_update(section_patterns.data(), section_patterns.size(),
+                     section_order.data(), section_order.size(),
+                     section_modules.data(), section_modules.size(),
+                     section_triggers.data(), section_triggers.size(),
+                     section_workbuf.data(), section_workbuf.size(), const_bytes,
+                     module_count, ticklen,
+                     data.num_rows, data.num_tracks, start_row,
+                     1.0 - data.master_hb_coeff, data.master_hb_coeff, data.master_hb_mix,
+                     data.module_skip_flags.data(), data.module_skip_flags.size());
     } else {
-	std::cerr << "some data section(s) empty, can't configure synth!" << std::endl;
+        std::cerr << "some data section(s) empty, can't configure synth!" << std::endl;
     }
 }
 

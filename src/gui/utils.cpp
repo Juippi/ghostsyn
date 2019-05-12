@@ -14,3 +14,19 @@ void print_words(unsigned char *data, size_t bytes, size_t line_len) {
 	}
     }
 }
+
+std::vector<std::string> split(std::string &str, char sep) {
+    std::vector<std::string> res;
+    size_t pos = 0;
+    while (pos < str.size()) {
+        size_t nextpos = str.find(sep, pos);
+        if (nextpos == std::string::npos) {
+            res.push_back(str.substr(pos, str.size()));
+            break;
+        } else {
+            res.push_back(str.substr(pos, nextpos));
+        }
+            pos = nextpos + 1;
+    }
+    return res;
+}

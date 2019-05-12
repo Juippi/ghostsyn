@@ -16,7 +16,7 @@ synth_pp.asm: synth.asm
 	nasm -e $^ >$@
 
 pp_defs.cache:
-	cat song.asm module*.asm synth.asm | ./intel2gas_pp.py defs $@
+	cat constants.asm song.asm module*.asm synth.asm | ./intel2gas_pp.py defs $@
 
 synth_att.asm: pp_defs.cache synth_pp.asm
 	./intel2gas_pp.py pre <synth_pp.asm >synth_pp.asm.preprocessed
@@ -51,7 +51,7 @@ _build_rendertest: rendertest.cpp synth_att.o
 rendertest: sizes rendertest.cpp synth_att.o
 	docker run -v $(CURDIR):/src buster-32-buildenv:latest \
 		make -C /src _build_rendertest
-	time ./rendertest out.wav
+	# time ./rendertest out.wav
 
 # Targets for showing estimates of final synth size
 synth.bin.text: synth_att.o
@@ -61,7 +61,7 @@ synth.bin.data: synth_att.o
 	objcopy --dump-section .data=$@ $^
 
 synth.packed: synth.bin.text synth.bin.data
-	cat $^ | gzip -c - >$@
+	xz --format=lzma --lzma1=preset=9,lc=1,lp=0,nice=273,pb=0 --stdout $^ >$@
 
 .PHONY sizes:
 sizes: synth.bin.text synth.bin.data synth.packed

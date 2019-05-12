@@ -16,9 +16,10 @@ void MainWindow::save_song() {
     song_json["_patch_editor"] = patch_editor->as_json();
     song_json["_tracker"] = tracker->as_json();
 
-    auto bin = data.bin();
+    auto bin = data.bin(true);
     std::stringstream asm_str;
 
+#if 0 // not now
     asm_str << std::fixed;
     asm_str << "master_hb_c1:" << std::endl <<
 	"dd " << (1 - data.master_hb_coeff) << std::endl;
@@ -26,7 +27,7 @@ void MainWindow::save_song() {
 	"dd " << data.master_hb_coeff << std::endl;
     asm_str << "master_hb_mix:" << std::endl <<
 	"dd " << data.master_hb_mix << std::endl;
-
+#endif
     data.unlock();
 
     for (auto *section : bin) {
@@ -41,7 +42,15 @@ void MainWindow::save_song() {
     def_str << "%define NUM_ROWS " << data.num_rows << std::endl;
     def_str << "%define NUM_TRACKS " << data.num_tracks << std::endl;
 
-    def_str << "%define ENABLE_SILENCE" << std::endl;
+    int workbuf_dwords = data.num_constants + data.num_accums;
+    def_str << "%define WORKBUF_DWORDS " << workbuf_dwords << std::endl;
+    def_str << "%define NUM_MODULE_CONSTANTS " << data.num_constants << std::endl;
+
+    def_str << "%define WORKBUF_BYTES WORKBUF_DWORDS * 4" << std::endl;
+    def_str << "%define CONST_BYTES NUM_MODULE_CONSTANTS * 4" << std::endl;
+
+    // Not in 4k sizes
+    // def_str << "%define ENABLE_SILENCE" << std::endl;
     for (auto &nt : Module::name_types) {
 	if (std::find_if(data.modules.begin(), data.modules.end(),
 			 [&nt] (auto &e) -> bool { return e.type == nt.second; })

@@ -44,4 +44,8 @@ public:
     // Convert num_rows rows of pattern data to binary representation
     std::vector<uint8_t> bin(unsigned int num_rows, unsigned int num_tracks);
     void resize(unsigned int num_rows);
+    // Delete row from track, shifting cells below up by one
+    void del_row(size_t track, size_t row);
+    void transpose(int semitones);
+    void transpose_track(int track_idx, int semitones);
 };

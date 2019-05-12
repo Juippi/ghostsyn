@@ -1,6 +1,6 @@
 include ../common.mk
 
-OBJS=pattern.o tracker_data.o module.o bin_section.o
+OBJS=pattern.o tracker_data.o module.o bin_section.o utils.o
 CXXFLAGS=$(COMMON_CXXFLAGS) -I/usr/include/jsoncpp
 
 libsynthdata.a: $(OBJS)

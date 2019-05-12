@@ -1,90 +1,66 @@
-;;; esi
-%define OSC_PARAM_GAIN	   4
-%define OSC_PARAM_FREQ_MOD 8
-%define OSC_PARAM_ADD	   12
-%define OSC_PARAM_DETUNE2  16 ; 2nd osc detune
+;;; params in stack upon entry
 
-;;; ebp
+;;; st0: add
+;;; st1: gain
+;;; st2: freq mod
+;;; st3: osc2 detune
+
+;;; state (ebp)
 %define OSC_STATE_CTR1	   0
 %define OSC_STATE_CTR2	   4
 
 module_oscillator:
-	pusha
+        pusha
 
-	fld1
-	fld dword [esi + OSC_PARAM_ADD] ; st0: osc add, st1: 1
+%ifdef OSC_ENABLE_FREQ_MOD
+;;; freq mod
+        fld1
+        ;; stack + 1
+        fadd st3
+        fmul dword [bss_stereo_factor] ; stereo detune
+        fmul st1
+        ;; st0 now osc add before possible osc2 detune
+%else
+        fld st0
+        fmul dword [bss_stereo_factor] ; stereo detune
+%endif
 
-	;; freq modulation
-	fld dword [esi + OSC_PARAM_FREQ_MOD]
-	fadd st2		; 1
-	fmulp                   ; st0: modulated add, st1: 1
-	;; stereo factor
-	fld dword [bss_stereo_factor]
-	fmulp                   ; st0: modulated add, st1: 1
+;;; oscillator 1
+        fld1
+        ;; stack + 2 - st0: 1, st1: osc add
+        fld dword [ebp + OSC_STATE_CTR1]
+        ;; stack + 3 - st0: ctr1, st1: 1, st2: osc add
+        fadd st2
+        fprem1                  ; st0 = st0 % 1
+        fst dword [ebp + OSC_STATE_CTR1]
+;;; oscillator 2
+        fxch st0, st2
+        ;; stack + 3 - st0: osc add, st1: 1, st2: ctr1
+        fmul st6                ; osc2 detune
+        fadd dword [ebp + OSC_STATE_CTR2]
+        fprem1
+        fst dword [ebp + OSC_STATE_CTR2]
+        ;; stack + 3 - st0: ctr2, st1: 1, st2: ctr1
 
-	fxch st0, st1
-	fld dword [ebp + OSC_STATE_CTR1] ; st0: osc counter, st1: 1, st2: modulated add
-	fadd st0, st2
+;;; stack cleanup
+        fxch st0, st1           ; move 1 to top
+        fstp st0                ; and remove
+        ;; stack + 2
+        faddp                   ; sum osc1 and osc2 for output
+        ;; stack + 1
 
-;;; noisify osc 1 (for pure noise, osc 2 can be silenced with detune == 0
-	test dword [esi], OSC_FLAG_NOISE
-	jz _skip_noise
-	fadd dword [fc1]	; just need some constant here
-	fmul st0
-	fadd st0
-_skip_noise:
+;;; osc shape
+%ifdef OSC_ENABLE_SINE
+        mov eax, [esi]
+        test eax, OSC_FLAG_SINE
+        jz osc_no_sin
+        fsin
+osc_no_sin:
+%endif
+        fmul st2                ; gain
 
-	fprem1
+        ;; output in st0, params remain in st1 - st4
 
-	fstp dword [ebp + OSC_STATE_CTR1] ; st0: 1, st1: modulated add
-
-	fld dword [esi + OSC_PARAM_DETUNE2]
-	fmulp st2, st0                   ; st0: 1, st1: modulated + detuned add
-
-	fld dword [ebp + OSC_STATE_CTR2]
-	fadd st0, st2
-	fprem1
-	fst dword [ebp + OSC_STATE_CTR2] ; st0: osc2, st1: 1, st2: modulated + detuned add
-
-;;;
-	;; sine shaper for osc2
-	test dword [esi], OSC_FLAG_SINE
-	jz _osc2_skip_sine
-	fadd st0
- _osc2_skip_sine:
-	;; half sine can sound good too, enable it
-	test dword [esi], OSC_FLAG_HSIN
-	jz _osc2_skip_hsin
-	fldpi
-	fmulp
-	fsin
-_osc2_skip_hsin:
-;;;
-
-	fld dword [ebp + OSC_STATE_CTR1]
-	faddp
-
-;;;
-	;; sine shaper for osc1
-	test dword [esi], OSC_FLAG_SINE
-	jz _osc1_skip_sine
-	fadd st0
-_osc1_skip_sine:
-	test dword [esi], OSC_FLAG_HSIN
-	jz _osc1_skip_hsin
-	fldpi
-	fmulp
-	fsin
-_osc1_skip_hsin:
-;;;
-
-	fxch st0, st2
-	fstp st0
-	fstp st0
-
-	fmul dword [esi + OSC_PARAM_GAIN]
-	;; output in st0
-
-	popa
+        popa
 osc_end:
-	ret
+        ret

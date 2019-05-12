@@ -26,10 +26,10 @@ public:
 
     class Trigger {
     public:
-	// Type of triggering to do (set osc pitch or reset env stage)
-	enum {SET_NONE, SET_PITCH, SET_ZERO} trig_type = SET_NONE;
 	// Trigger this module (index)
 	int trig_module_idx = 0;
+        // Trigger this parameter of the module
+        int trig_param = 0;
     };
 
     // 2 * 4 per track (4 trigs per instruments, primary & alt instr per track)
@@ -47,6 +47,13 @@ public:
     // some modules for speedk
     std::vector<uint8_t> module_skip_flags;
 
+    // XXX todo, for const dedup?
+    std::map<float, int> float_constants;
+    // Constant count for %defines
+    int num_constants = 0;
+    // Accumulator count
+    int num_accums = 0;
+
     void from_json(Json::Value &json);
     Json::Value as_json();
 
@@ -57,7 +64,7 @@ public:
     std::vector<uint8_t> trigger_points_bin();
 
     // Get all synth data as sections for generating asm source
-    std::vector<Section *> bin();
+    std::vector<Section *> bin(bool remove_unused_patterns = false);
 
     // Append new pattern after others
     void new_pattern();
@@ -71,6 +78,9 @@ public:
     Pattern::Track get_track(size_t pattern, size_t track_no);
     void set_track(size_t pattern, size_t track_no, Pattern::Track track);
     void clear_track(size_t pattern, size_t track_no);
+
+    void transpose_pattern(int pattern_idx, int semitones);
+    void transpose_pattern_track(int pattern_idx, int track_idx, int semitones);
 
     void lock();
     void unlock();

@@ -1,6 +1,10 @@
 #include "module.hpp"
+#include "utils.hpp"
 #include <cstring>
 #include <iostream>
+#include <boost/range/irange.hpp>
+
+using boost::irange;
 
 const std::map<Module::ModuleType, std::string> Module::type_names = {
     {TYPE_OSC, "oscillator"},
@@ -19,16 +23,6 @@ const std::map<std::string, Module::ModuleType> Module::name_types = {
 	{"reverb", TYPE_REVERB},
 	{"chorus", TYPE_CHORUS}
 };
-
-// Convert floating point value to byte array & truncate to N bits
-std::vector<uint8_t> float2bin(const float value, unsigned int bits = 24) {
-    std::vector<uint8_t> bytes(sizeof(float));
-    memcpy(bytes.data(), &value, sizeof(float));
-    for (unsigned int i = 0; i < (32 - bits); ++i) {
-	bytes[i / 8] &= ~(0x80 >> (i % 8));
-    }
-    return bytes;
-}
 
 std::string Module::type2str(int _type) {
     switch (_type) {
@@ -50,44 +44,25 @@ std::string Module::type2str(int _type) {
 }
 
 std::vector<uint8_t> Module::Param::bin() {
-    switch (type) {
-    case TYPE_INT32:
-    {
-	int32_t val = static_cast<int32_t>(int_value);
-	std::vector<uint8_t> res(sizeof(val));
-	memcpy(res.data(), &val, sizeof(val));
-	return res;
-	break;
-    }
-    case TYPE_FLOAT:
-	return float2bin(float_value, float_trunc_bits);
-    default:
-	return std::vector<uint8_t>(4);
-    }
+    return float2bin(value, float_trunc_bits);
 }
 
-Module::Param::Param() {
-    type = TYPE_INT32;
-    int_value = 0;
-}
+Module::Param::Param() {}
 
-Module::Param::Param(const std::string &name_, float value, int trunc_bits)
-    : name(name_), float_trunc_bits(trunc_bits) {
-    type = TYPE_FLOAT;
-    float_value = value;
-}
-
-Module::Param::Param(const std::string &name_, const int value) : name(name_) {
-    type = TYPE_INT32;
-    int_value = value;
-}
+Module::Param::Param(const std::string &name_, float value_, bool keeps_state_,
+                     int trunc_bits)
+    : name(name_), value(value_), float_trunc_bits(trunc_bits),
+      keeps_state(keeps_state_) {}
 
 Json::Value Module::Param::as_json() const {
-    if (type == TYPE_INT32) {
-	return Json::Value(int_value);
-    } else {
-	return Json::Value(float_value);
-    }
+    return Json::Value(value);
+}
+
+bool Module::Param::is_deduplicable() {
+    return (float_trunc_bits >= 24 &&
+            !keeps_state &&
+            !is_connection_target &&
+            !is_trigger_target);
 }
 
 Module::Module() {}
@@ -100,9 +75,9 @@ Module::Module(ModuleType type_)
     : type(type_) {
     switch (type) {
     case TYPE_OSC:
-	params.push_back(Param("gain", 0.1f, 16));
-	params.push_back(Param("freq_mod", 0.0f));
 	params.push_back(Param("add", 0.0f));
+	params.push_back(Param("gain", 0.1f));
+	params.push_back(Param("freq_mod", 0.0f));
 	params.push_back(Param("detune", 1.0f));
 	break;
     case TYPE_FILTER:
@@ -111,11 +86,10 @@ Module::Module(ModuleType type_)
 	params.push_back(Param("feedback", 0.0f));
 	break;
     case TYPE_ENV:
-	params.push_back(Param("attack", 0.1f, 16));
+	params.push_back(Param("stage", 0.0f, true));
 	params.push_back(Param("switch", 0.5f));
 	params.push_back(Param("release", 0.999f));
-	// needs to be in decay state initially to avoid spurious trigger at start
-	params.push_back(Param("stage", 1));
+	params.push_back(Param("attack", 0.1f));
 	break;
     case TYPE_COMP:
 	params.push_back(Param("input", 0.0f));
@@ -123,13 +97,13 @@ Module::Module(ModuleType type_)
 	params.push_back(Param("attack", 0.99f));
 	params.push_back(Param("release", 0.001f));
 	break;
-    case TYPE_REVERB:
+    case TYPE_REVERB: // TODO
 	params.push_back(Param("input", 0.0f));
-	params.push_back(Param("taps", 1));
+	params.push_back(Param("taps", 1.0f));
 	params.push_back(Param("feedback", 0.5f));
 	params.push_back(Param("lp", 0.5f));
 	break;
-    case TYPE_CHORUS:
+    case TYPE_CHORUS: // TODO?
 	params.push_back(Param("input", 0.0f));
 	params.push_back(Param("modamp", 0.0f));
 	params.push_back(Param("time", 0.0f));
@@ -154,9 +128,9 @@ void Module::from_json(Json::Value &json) {
 
     switch (type) {
     case TYPE_OSC:
+	params.push_back(Param("add", params_json["add"].asFloat()));
 	params.push_back(Param("gain", params_json["gain"].asFloat(), 16));
 	params.push_back(Param("freq_mod", params_json["freq_mod"].asFloat()));
-	params.push_back(Param("add", params_json["add"].asFloat()));
 	params.push_back(Param("detune", params_json["detune"].asFloat()));
 	break;
     case TYPE_FILTER:
@@ -165,10 +139,10 @@ void Module::from_json(Json::Value &json) {
 	params.push_back(Param("feedback", params_json["feedback"].asFloat()));
 	break;
     case TYPE_ENV:
+	params.push_back(Param("stage", 0.0f, true));
 	params.push_back(Param("switch", params_json["switch"].asFloat()));
 	params.push_back(Param("attack", params_json["attack"].asFloat(), 16));
 	params.push_back(Param("release", params_json["release"].asFloat()));
-	params.push_back(Param("stage", 1));
 	break;
     case TYPE_COMP:
 	params.push_back(Param("input", 0.0f));
@@ -226,51 +200,39 @@ Json::Value Module::as_json() {
 }
 
 std::vector<Section *> Module::bin() {
-    std::cerr << "dump module" << std::endl;
+    std::cerr << "dump module hdr" << std::endl;
     std::vector<Section *> res;
-    std::vector<uint8_t> tmp(4);
-    uint32_t out_offset;
-    if (out_module < 0) {
-	out_offset = 0;
-    } else {
-	// TODO: turn magic numbers into constants
-	out_offset = ((out_module - my_index) * 4 * 5 +
-		      out_param * 4);
-    }
+    std::vector<uint8_t> tmp(6);
 
     res.push_back(new CommentSection("type: " + type2str(type)));
+    // byte 0, module type, flags
     tmp[0] = static_cast<uint8_t>(type);
-    tmp[1] = op_flags[out_op];
     if (stereo) {
 	tmp[0] |= 0x80;
     }
     if (type == TYPE_OSC) {
-        tmp[2] = osc_shape_flags[osc_shape];
+        // tmp[0] = osc_shape_flags[osc_shape]; // TODO: doesn't work atm
     } else if (type == TYPE_FILTER) {
-        tmp[2] = filter_type_flags[filter_type];
+        tmp[0] |= filter_type_flags[filter_type];
     }
-    tmp[3] = out_offset;
-    res.push_back(new BinSection("modules", tmp));
 
-    for (auto &param : params) {
-	res.push_back(new BinSection("modules", param.bin()));
+    // byte 1: output idx to routing array
+    tmp[1] = out_workbuf_idx;
+
+    // 2-5: param input indexes
+    // note: these should be written in  _reverse_ order here because they're
+    // pushed to FPU stack
+    for (size_t i : irange(0u, 4u)) {
+        // these are byte offsets, at least for now
+        tmp[i + 2] = params[3 - i].index_in_workbuf;
     }
+    
+    res.push_back(new BinSection("modules", tmp));
 
     return res;
 }
 
 void Module::print() {
-    std::cerr << "-- Module --" << std::endl
-	      << " type: " << type_names.at(type) << std::endl
-	      << " out_module: " << out_module << std::endl
-	      << " out_param: " << out_param << std::endl
-	      << " params:";
-    for (auto &param : params) {
-	if (param.type == Param::TYPE_FLOAT) {
-	    std::cerr << " f:" << param.float_value;
-	} else {
-	    std::cerr << " i:" << param.int_value;
-	}
-    }
+    std::cerr << "-- Module --" << std::endl;
     std::cerr << std::endl << "-------------" << std::endl;
 }

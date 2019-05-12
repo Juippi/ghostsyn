@@ -3,63 +3,59 @@
 ;;;  - switch at defined gain level
 ;;;  - exponential decay
 ;;;
-;;; TODO: N stage support
 
-;;; esi
-%define ENV_PARAM_ATT      4  ; linear attack add
-%define ENV_PARAM_SWITCH   8 ; level for A -> D switch (or how about just doing at 1?)
-%define ENV_PARAM_DECAY    12 ; multiplier for exp decay
-%define ENV_PARAM_STAGE    16 ; env stage A: 0, D: 1
+;;; params in stack upon entry
+
+;;; st0: env stage: st0 != 0 -> Attack, st0 == 0 -> Decay
+;;; st1: a->d switch level
+;;; st2: attack add
+;;; st3: exp decay multiplier
+
+;;; TODO should one param be optionally integer too, and delivered
+;;; here in a register in addition to pushing it to fpu stack
+;;; or just 3 float params & 1 int param always?
 
 ;;; ebp
 %define ENV_STATE_LEVEL    0  ; current level
 
-%define ENV_STAGE_ATTACK   1
-%define ENV_STAGE_DECAY    0
-%define ENV_STAGE_RELEASE  2
-
-;;; small constant for denormal killing
-small:
-        db 0
-        db 0
-        db 0x80
-        db 0
-
 module_envelope:
         pusha
+
+        ;; update zero flag according to value of env state in st0
+        fldz
+        ;; stack +1
+        fcomip st1
+        ;; stack +0
+
+        ;; load envelope level
         fld dword [ebp + ENV_STATE_LEVEL]
-        mov eax, [esi + ENV_PARAM_STAGE]
-        cmp eax, ENV_STAGE_ATTACK
-        jne .in_decay
-        fld dword [esi + ENV_PARAM_ATT]
-        faddp
-        ;; test for state switch
-        fld dword [esi + ENV_PARAM_SWITCH]
-        fcomip
-        jnc .no_switch
-        xor eax, eax		; mov eax, ENV_STAGE_DECAY
-        mov [esi + ENV_PARAM_STAGE], eax
-.no_switch:
+        ;; stack +1
+
+        jz .no_attack
+        fadd st3                ; add linear attack
         jmp .no_decay
-.in_decay:
-        fld dword [esi + ENV_PARAM_DECAY]
-        ;; faster decay after note off
-        cmp eax, 0
-        je .no_release
-        fmul st1, st0
-        fmul st1, st0
-        fmul st1, st0
-.no_release:
-        fmulp
+.no_attack:
+        fmul st4                ; apply exp. decay
+        ;; add small constant to prevent denormals during exp. decay
+        ;; fadd dword [small]
 .no_decay:
-
-        ;; denormal killling
-        fld dword [small]
-        faddp
-
+        ;; store new env level
         fst dword [ebp + ENV_STATE_LEVEL]
 
+        ;; check if we need to switch to decay
+        fld st2                 ; load env a->d switch level
+        fcomip
+        jnc no_switch
+decay_switch:
+        ;; switch to decay
+        fldz
+        ;; stack +2
+        fxch st2
+        fstp st0
+        ;; stack +1
+no_switch:
+
         ;; output in st0
-envelope_end:
         popa
+envelope_end:
         ret

@@ -93,12 +93,12 @@ class PatchEditorWindow : public EditorWindow {
 
     // Labels for displayed param values for each module type
     std::map<Module::ModuleType, std::vector<std::string>> module_param_labels = {
-	{Module::TYPE_OSC, {"gain", "fmod", "add ", "dtne"}},
+	{Module::TYPE_OSC, {"add", "gain", "fmod ", "dtne"}},
 	{Module::TYPE_FILTER, {"in  ", "coff", "fdbk", "   "}},
-	{Module::TYPE_ENV, {"att ", "swtc", "dcay", "stg "}},
-	{Module::TYPE_COMP, {"in  ", "thre", "att ", "rel "}},
-	{Module::TYPE_REVERB, {"in  ", "taps", "fdbk", "lp  "}},
-	{Module::TYPE_CHORUS, {"in", "time", "madd", "mamp"}}
+	{Module::TYPE_ENV, {"stg ", "swtc", "att ", "dcay"}},
+	{Module::TYPE_COMP, {"in  ", "thre", "att ", "rel "}}, // TODO
+	{Module::TYPE_REVERB, {"in  ", "taps", "fdbk", "lp  "}}, // TODO
+	{Module::TYPE_CHORUS, {"in", "time", "madd", "mamp"}} // TODO?
     };
 
     static constexpr int MASTER_OUT_IDX = 0;
@@ -140,6 +140,9 @@ class PatchEditorWindow : public EditorWindow {
     Button prev_page;
     Button next_page;
 
+    // Track shift state for emulating mid click with shift+right
+    bool shift_down = false;
+
     // Clamp module position to editor area
     void clamp_module_pos(EditorModule &module);
     // Return true if connection graph contains a cycle (and thus can't be
@@ -149,8 +152,12 @@ class PatchEditorWindow : public EditorWindow {
     void update_params_from_ui();
     //
     void update_track_instruments_from_ui();
-
     void change_page(int dir);
+
+    // mouse click handlers
+    void mouse_left(int x, int y);
+    void mouse_middle();
+    void mouse_right();
 
   public:
     PatchEditorWindow(int x, int y, int width, int height, int num_tracks,

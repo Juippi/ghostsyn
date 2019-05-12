@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector<float> outbuf(song_frames);
-
+    std::cerr << "calling synth for " << song_frames << " frames" << std::endl;
     synth(outbuf.data(), song_frames);
     //mastering(outbuf.data(), song_frames);
 

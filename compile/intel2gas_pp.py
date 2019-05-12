@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     operands = " ".join(fields[1:]).split(",")
                     for p in range(len(operands)):
                         if re.match("^bss_.*", operands[p]):
-                            operands[p] = "_ZL8g_buffer+" + str(definitions["BOFF_" + operands[p][4:].upper()])
+                            operands[p] = "_ZL14g_audio_buffer+" + str(definitions["BOFF_" + operands[p][4:].upper()])
                     fields = [fields[0] , ",".join(operands)]
 
                 # remove bss_*: labels, everything is relative to g_buffer now
@@ -135,7 +135,7 @@ if __name__ == "__main__":
                 print("shl %cl,%ebx")
 
             # fix fpu instruction memory operand sizes
-            elif fields[0] not in  ("fmul", "fildl") and fields[0][0] == "f" and fields[0][-1] == "l":
+            elif fields[0] not in  ("fmul", "fildl", "fistpl", "fidivl", "fimull") and fields[0][0] == "f" and fields[0][-1] == "l":
                 print("%ss %s" % (fields[0][:-1], " ".join(fields[1:])))
 
             # fix section starts

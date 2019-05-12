@@ -50,6 +50,8 @@ protected:
     void cursor_move_track(int dir);
 
     bool edit(int key_char);
+    void del_row();
+    void transpose_track(int semitones);
     void change_octave(int dir);
     void change_instrument(int dir);
     void change_pattern(int dir);

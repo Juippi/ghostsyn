@@ -1,13 +1,13 @@
-INTRODIR := $(CURDIR)/../cassini
+INTRODIR := $(CURDIR)/../region_de_magallanes
 FREEBSD_VM := fb32
-INTRODIR_VM := ~/git/adarkar_wastes/src/
-COMPILE_SONG ?= src/gui/testsong.json
+INTRODIR_VM := ~/git/region_de_magallanes/src/
+COMPILE_SONG ?= foo.json
 
 all: build
 
 build:
 	docker run -v $(PWD)/src:/src \
-		buster-32-buildenv:latest $(MAKE) -j4 -C src/ editor tools algotests
+		buster-32-buildenv:latest $(MAKE) -j4 -C src/ synth/synth.o editor tools
 
 buildshell:
 	docker run -ti -v $(PWD)/src:/src \
@@ -30,7 +30,7 @@ install: compile
 	make -C compile synth_for_intro.asm
 	cp -v compile/synth_for_intro.asm $(INTRODIR)/src/synth.asm
 	cp -v compile/song_params.h $(INTRODIR)/src/synth.h
-	cp -v compile/out.wav $(INTRODIR)/cassini.wav
+	# cp -v compile/out.wav $(INTRODIR)/region_de_magallanes.wav
 
 introtest: install
 	scp -v compile/synth_for_intro.asm $(FREEBSD_VM):$(INTRODIR_VM)/synth.asm

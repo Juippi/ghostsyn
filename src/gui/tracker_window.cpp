@@ -178,7 +178,17 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		}
 		changed = true;
 	    }
-	    break;
+            break;
+
+            // Transpose notes on current track
+            case SDLK_PERIOD:
+                transpose_track(1);
+                changed = true;
+                break;
+            case SDLK_COMMA:
+                transpose_track(-1);
+                changed = true;
+                break;
 
 	    // Helpers to kbds without numpad
 	    case SDLK_LEFT:
@@ -268,10 +278,14 @@ void TrackerWindow::key_down(const SDL_Keysym &sym) {
 		changed = true;
 		break;
 	    case SDLK_DELETE:
-		if (edit(-1)) {
-		    cursor_move(0, 1);
-		    changed = true;
-		}
+                if (sym.mod & KMOD_SHIFT) {
+                    del_row();
+                } else {
+                    if (edit(-1)) {
+                        cursor_move(0, 1);
+                    }
+                }
+                changed = true;
 		break;
 	    case SDLK_KP_PLUS:
 		change_pattern(1);
@@ -462,7 +476,7 @@ void TrackerWindow::update() {
 		if (hw_notes) {
 		    x = start_x + Text::char_width * 2 * 4;
 		} else {
-		    x = start_x + Text::char_width * 2 * 7;
+		    x = start_x + Text::char_width * 2 * 6;
 		}
 		if (hw_effects) {
 		    draw_text_hw(x, start_y, r_text.str(),
@@ -746,6 +760,20 @@ bool TrackerWindow::edit(int key_char) {
     }
     data.unlock();
     return false;
+}
+
+void TrackerWindow::del_row() {
+    data.lock();
+    int track = cursor_x / 4;
+    data.patterns[current_pattern].del_row(track, cursor_row);
+    data.unlock();
+}
+
+void TrackerWindow::transpose_track(int semitones) {
+    data.lock();
+    int track = cursor_x / 4;
+    data.transpose_pattern_track(current_pattern, track, semitones);
+    data.unlock();
 }
 
 void TrackerWindow::change_octave(int dir) {

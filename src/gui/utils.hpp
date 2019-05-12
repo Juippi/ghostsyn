@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <limits>
+#include <vector>
 
 // Print bytes
 // data - ptr to data
@@ -41,3 +42,5 @@ std::string tostr(const T &val) {
     ss << val;
     return ss.str();
 }
+
+std::vector<std::string> split(std::string &str, char sep = ' ');
