@@ -23,7 +23,10 @@ there are few safeguards and sanity checks for synth parameters, making it
 possible to inadvertently create very loud and unpleasant sounds. Knowledge of
 subtractive synthesis fundamentals is mandatory.
 
-Song data format is not currently stable.
+Song data format is not stable, and the features of the synth constantly evolve,
+so playing older songs with the current version will most likely not work.
+
+The graphical UI is not very good.
 
 If you're looking for more polished tools, there are several available, and some
 even provide a VST plugin for composing songs in a full-fledged DAW environment.
@@ -51,18 +54,22 @@ rudimentary tooling and requiring constant tweaking of program code to operate.
 .. _Primordial Soup: http://www.pouet.net/prod.php?which=71419
 .. _Adarkar Wastes: http://www.pouet.net/prod.php?which=75218
 .. _Cassini: http://www.pouet.net/prod.php?which=77364
+.. _Región de Magallenes: http://www.pouet.net/prod.php?which=82448
    
 This particular iteration got started as the synth for `Ghosts of Mars`_
 and was originally written in C. An expanded version was used on
 `My Mistress the Leviathan`_ the following year, after which an x86 assembly
 rewrite was started to optimize size and cut some non-essential features.
 The result of this was then used on `Primordial Soup`_ and `Adarkar Wastes`_,
-with some tweaks and tooling improvements in between. Latest production using
-this synth was `Cassini`_, which was released at Assembly 2018.
+with some tweaks and tooling improvements in between. Since then, it has been
+used on `Cassini`_, ,released at Assembly 2018, and `Región de Magallenes`_,
+2019.
 
 Features
 --------
 
+* Small code & data footprint: an usable tune can be fit in 1000-1200
+  bytes (after xz compression).
 * Visual graph editor for building instruments
 * Tracker-like UI for building songs
 * Oscillator, envelope and 2-mode filter modules, enabling
@@ -284,12 +291,9 @@ Filter
 ^^^^^^
 
 Filter is a 2-pole resonant low-pass filter with a relatively wide resonance
-peak. Tweaking its parameters requires some care, as the range between
-pleasant and unstable feedback (resonance) values can be quite narrow, but
-it can occasionally sound quite nice. It's also offers some variation to the
-often seen 'classic' state variable design.
+peak. 
 
-Filter also supports high-pass mode where original input signal is subtracter
+Filter also supports high-pass mode where original input signal is subtracted
 from LP output, creating a HP filter with an extra notch.
 
 Parameters
@@ -300,9 +304,10 @@ Parameters
 *cutoff*
   Filter cutoff, range 0.0 - 1.0.
 *feedback (resonance)*
-  Controls filter resonance. Range 0.0 - 1.0, but high values risk making
-  the filter unstable, depending on the cutoff frequency. Usually at least
-  up to 0.8 should be usable.
+  Controls filter resonance. Useful range is from 0.0 to ~2.8 or so, depending
+  on the input signal and filter cutoff. There's a small tweak on the filter
+  feedback path to protect against instability, but wrong parameters can still
+  produce loud and unpleasant tones. Use with care.
 
 Envelope
 ^^^^^^^^
@@ -334,6 +339,8 @@ pseudorandomly placed taps and a LP filter. For stability,
 <number of taps> * <feedback> shouldn't exceed 1, but depending on LP
 filter cutoff, output may stay stable at slightly higher values too.
 
+Not sure if this currently works, will bring back eventually.
+
 Parameters
 ''''''''''
 
@@ -349,16 +356,27 @@ Parameters
   LP coefficient should be in [0.0, 1.0] with higher values meaning lower
   cutoff (more HF attenuation).
 
-Chorus
-^^^^^^
+Compressor/distortion
+^^^^^^^^^^^^^^^^^^^^^
 
-Rough sounding chorus effect without interpolation. May be replaced later
-with something else.
+Dynamic compressor with attack/threshold/release controls. Can also be used
+for limiter/distortion effects by setting .
 
 Parameters
 ''''''''''
 
-TODO
+*input*
+  Target for input.
+*threshold*
+  When abs signal level is this or higher, apply compressor attack.
+  Otherwise, apply release.
+*attack*
+  Multiply current output gain by this for each sample when in attack
+  state. Value slightly below 1.0 are the useful ones.
+*release*
+  Add this to current output gain when in release state, until gain
+  reaches 1. Very fast release values (significantly above 0.01 or so)
+  are not recommended, since they may cause gain to overshoot 1.0.
 
 Master stage
 ------------
@@ -373,18 +391,14 @@ band instead.
 TODO
 ----
 
-* Revert or make optional some size-increasing tweaks made for Cassini, so
-  that there's no extra bloat to hinder future 4k projects.
 * Make synth buildable as 64 bit to make it possible to link it to a 64 bit
   editor UI, removing the need for 32 bit build environment. This would not
   be hard; defining macros for pusha and popa would already take care of most
   of the incompatibilities.
 * Add more oscillator shapes.
-* Offer more filter types in addition to low-pass with fixed resonant peak width.
 * Add UI for customizing stereo effect & end fade.
 * Implement properly working note off command
 * Bring back stereo delay effect that was dropped for Adarkar Wastes.
-* Simpler & more compact note triggering logic.
 * Replace the very messy NASM -> AT&T syntax conversion with something simpler.
   Shortcomings of the intel2gas tool currently require several custom pre- and
   post-processing steps to produce a syntactically correct result.
